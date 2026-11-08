@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Odak Zamanı — Yapılacaklar ve Zamanlayıcı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFDF7; --ink:#2D3047; --muted:#7A7F96; --line:#ECE7DA; --card:#fff;
+    --red:#FF6B6B; --orange:#FF9F43; --yellow:#FECA57; --green:#1DD1A1;
+    --cyan:#48DBFB; --blue:#54A0FF; --purple:#5F27CD; --pink:#FF6FB5;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:"Nunito",system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);background:var(--bg);
+    background-image:
+      radial-gradient(circle at 12% 18%, #FF6B6B22 0 3px, transparent 4px),
+      radial-gradient(circle at 78% 8%, #54A0FF22 0 4px, transparent 5px),
+      radial-gradient(circle at 40% 70%, #1DD1A122 0 3px, transparent 4px),
+      radial-gradient(circle at 90% 60%, #FECA5733 0 4px, transparent 5px),
+      radial-gradient(circle at 60% 35%, #FF6FB522 0 3px, transparent 4px);
+    background-size:220px 220px; min-height:100vh;
+  }
+  .rainbow{height:6px;background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow),var(--green),var(--cyan),var(--blue),var(--purple),var(--pink))}
+  .wrap{max-width:760px;margin:0 auto;padding:22px 16px 60px}
+  header{text-align:center;margin:10px 0 18px}
+  h1{font-size:clamp(28px,6vw,40px);font-weight:900;margin:0;letter-spacing:.5px;
+     background:linear-gradient(90deg,var(--red),var(--orange),var(--green),var(--blue),var(--purple),var(--pink));
+     -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--muted);margin:6px 0 0;font-weight:600}
+  .quote{margin:14px auto 0;display:inline-block;padding:8px 16px;border-radius:999px;background:#5F27CD14;color:var(--purple);font-weight:700;font-style:italic}
+  .card{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:18px;margin:16px 0;box-shadow:0 6px 0 #0000000a}
+  .card h2{margin:0 0 12px;font-size:19px;font-weight:900;display:flex;align-items:center;gap:8px}
+  .card h2 .tag{font-size:12px;font-weight:800;color:#fff;border-radius:999px;padding:2px 9px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  input[type=text],input[type=number]{font:inherit;font-weight:700;color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:11px 13px;background:#fff;outline:none;min-width:0}
+  input:focus{border-color:var(--blue)}
+  #newTitle{flex:1 1 220px}
+  .min-wrap{display:flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:14px;padding:0 10px;background:#fff}
+  .min-wrap input{border:none;width:58px;padding:11px 0;text-align:right}
+  .min-wrap span{color:var(--muted);font-weight:700}
+  button{font:inherit;font-weight:800;border:none;border-radius:14px;padding:11px 16px;cursor:pointer;transition:transform .08s, filter .15s}
+  button:active{transform:scale(.97)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .btn{background:var(--ink);color:#fff}
+  .btn-green{background:var(--green);color:#fff}
+  .btn-blue{background:var(--blue);color:#fff}
+  .btn-pink{background:var(--pink);color:#fff}
+  .btn-orange{background:var(--orange);color:#fff}
+  .btn-ghost{background:#F3F0E7;color:var(--ink)}
+  .save-check{display:flex;align-items:center;gap:6px;color:var(--muted);font-weight:700;font-size:14px;margin-top:10px;cursor:pointer;user-select:none}
+  .save-check input{width:18px;height:18px;accent-color:var(--orange)}
+
+  .tasks{list-style:none;margin:0;padding:0}
+  .task{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border-radius:16px;margin-bottom:8px;border:2px solid var(--line);background:#fff;border-left-width:7px}
+  .task.done .t-title{text-decoration:line-through;color:var(--muted)}
+  .task input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:var(--green);cursor:pointer}
+  .task{flex-wrap:wrap}
+  .t-title{flex:1 1 150px;font-weight:800;word-break:break-word;min-width:0}
+  .t-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
+  .chip{font-size:13px;font-weight:800;border-radius:999px;padding:3px 9px;background:#F3F0E7;color:var(--ink);white-space:nowrap}
+  .icon-btn{background:transparent;padding:6px 8px;font-size:18px;border-radius:10px;line-height:1}
+  .icon-btn:hover{background:#F3F0E7}
+  .star.on{color:var(--orange)} .star{color:#C9C5B8}
+  .play{background:var(--green);color:#fff;padding:8px 13px;font-size:14px}
+  .empty{color:var(--muted);text-align:center;padding:14px;font-weight:700}
+  .lib{display:flex;flex-wrap:wrap;gap:8px}
+  .lib-item{display:flex;align-items:center;border-radius:999px;border:2px solid var(--line);background:#fff;overflow:hidden}
+  .lib-item button{border-radius:0;background:transparent;padding:8px 12px;font-weight:800}
+  .lib-item .add{color:var(--ink)}
+  .lib-item .add:hover{background:#1DD1A11a}
+  .lib-item .x{color:#C0BBAE;padding:8px 10px;border-left:2px solid var(--line)}
+  .lib-item .x:hover{color:var(--red)}
+  .hint{color:var(--muted);font-size:13.5px;font-weight:600;margin:10px 0 0}
+  .foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
+  .sync{font-size:12.5px;color:var(--muted);font-weight:700}
+
+  /* Overlays */
+  .overlay{position:fixed;inset:0;background:#2D304799;display:none;align-items:center;justify-content:center;padding:16px;z-index:50;backdrop-filter:blur(3px)}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:24px;max-width:470px;width:100%;padding:22px;max-height:92vh;overflow:auto;border-top:8px solid var(--orange)}
+  .modal h3{margin:0 0 4px;font-size:22px;font-weight:900}
+  .modal .for{color:var(--muted);font-weight:700;margin:0 0 14px}
+  .check{display:flex;gap:12px;align-items:flex-start;padding:12px;border:2px solid var(--line);border-radius:16px;margin-bottom:9px;cursor:pointer;user-select:none}
+  .check input{width:22px;height:22px;flex:none;margin-top:2px;accent-color:var(--green)}
+  .check.req b::after{content:" *";color:var(--red)}
+  .check small{display:block;color:var(--muted);font-weight:600;margin-top:2px}
+  .check:has(input:checked){border-color:var(--green);background:#1DD1A10f}
+  .presets{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+  .presets button{background:#F3F0E7;color:var(--ink);padding:8px 12px}
+  .presets button.sel{background:var(--blue);color:#fff}
+  .lbl{font-weight:900;margin:14px 0 4px;display:block}
+  .actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+  .actions button{flex:1}
+
+  /* Timer screen */
+  #timerScreen{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;
+    background:radial-gradient(circle at 50% 40%, #fff 0, #FFF6E5 60%, #FFE9F3 100%)}
+  #timerScreen.show{display:flex}
+  .ts-task{font-size:clamp(20px,5vw,28px);font-weight:900;text-align:center;max-width:600px;margin:0 0 4px}
+  .ts-label{color:var(--muted);font-weight:800;letter-spacing:1.5px;font-size:13px;text-transform:uppercase}
+  .ring{position:relative;width:min(78vw,320px);aspect-ratio:1;margin:22px 0}
+  .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .ring .time{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
+  .ring .big{font-size:clamp(48px,14vw,72px);font-weight:900;font-variant-numeric:tabular-nums}
+  .ring .paused{color:var(--orange);font-weight:900;font-size:14px;letter-spacing:1px;visibility:hidden}
+  .ts-quote{color:var(--purple);font-style:italic;font-weight:700;text-align:center;max-width:520px;min-height:1.4em}
+  .ts-silent{margin-top:10px;font-size:13.5px;color:var(--muted);font-weight:700}
+  .ts-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;justify-content:center}
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+  .confetti i{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;animation:fall 2.4s linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.7}}
+  .next-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+  .next-list button{background:#F3F0E7;color:var(--ink);text-align:left;display:flex;justify-content:space-between;gap:8px}
+  .next-list button:hover{background:#1DD1A122}
+</style>
+</head>
+<body>
+<div class="rainbow"></div>
+<div class="wrap">
+  <header>
+    <h1>Odak Zamanı</h1>
+    <p class="sub">İşini yaz, süreni kur, telefonu sessize al. Gerisi kolay!</p>
+    <div class="quote" id="topQuote">Küçük adımlar büyük yolculukların başlangıcıdır.</div>
+  </header>
+
+  <section class="card">
+    <h2>✏️ Yeni iş ekle</h2>
+    <form id="addForm" class="row" autocomplete="off">
+      <input type="text" id="newTitle" placeholder="Örn: 20 sayfa kitap oku" maxlength="120" required>
+      <label class="min-wrap" title="Süre (dakika)"><input type="number" id="newMin" min="1" max="600" value="25"><span>dk</span></label>
+      <button class="btn-green" type="submit">Ekle</button>
+    </form>
+    <label class="save-check"><input type="checkbox" id="newSave"> ⭐ Kayıtlı işlerime de ekle (bir dahakine yeniden yazmayayım)</label>
+  </section>
+
+  <section class="card">
+    <h2>📋 Bugünkü işlerim <span class="tag" id="countTag" style="background:var(--blue)">0/0</span></h2>
+    <ul class="tasks" id="taskList"></ul>
+    <div class="foot">
+      <span class="hint">▶ ile zamanlayıcıyı başlat · ⭐ ile işi kaydet</span>
+      <button class="btn-ghost" id="clearDone" type="button">Bitenleri temizle</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>⭐ Kayıtlı işlerim</h2>
+    <div class="lib" id="libList"></div>
+    <p class="hint">Bir kayıtlı işe dokun, bugünkü listene eklensin. Tekrar yazmana gerek yok.</p>
+  </section>
+
+  <div class="foot"><span class="sync" id="sync">Kaydediliyor…</span></div>
+</div>
+
+<!-- Pre-start reminder -->
+<div class="overlay" id="preOverlay" role="dialog" aria-modal="true" aria-labelledby="preTitle">
+  <div class="modal">
+    <h3 id="preTitle">🔕 Başlamadan önce</h3>
+    <p class="for" id="preFor"></p>
+    <label class="check req"><input type="checkbox" class="pc" data-req="1"><div><b>📱 Telefonumu sessize aldım</b><small>Rahatsız Etmeyin / Odak modunu aç, ekranı ters çevir.</small></div></label>
+    <label class="check req"><input type="checkbox" class="pc" data-req="1"><div><b>💻 Bilgisayar bildirimlerini kapattım</b><small>Windows: Odak / Rahatsız Etmeyin · Mac: Denetim Merkezi → Odak.</small></div></label>
+    <label class="check"><input type="checkbox" class="pc"><div><b>🗂️ Gereksiz sekme ve uygulamaları kapattım</b><small>Sadece bu iş için gerekenler açık kalsın.</small></div></label>
+    <label class="check"><input type="checkbox" class="pc"><div><b>💧 Suyum yanımda</b><small>Kalkmana gerek kalmasın.</small></div></label>
+    <span class="lbl">⏱️ Süre</span>
+    <div class="presets" id="presets"></div>
+    <label class="min-wrap" style="display:inline-flex"><input type="number" id="preMin" min="1" max="600" value="25"><span>dakika</span></label>
+    <div class="actions">
+      <button class="btn-ghost" id="preCancel" type="button">Vazgeç</button>
+      <button class="btn-green" id="preStart" type="button" disabled>Hazırım, başla! 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- Timer screen -->
+<div id="timerScreen" aria-live="polite">
+  <div class="ts-label" id="tsLabel">Şu an odaklandığın iş</div>
+  <h2 class="ts-task" id="tsTask"></h2>
+  <div class="ring">
+    <svg viewBox="0 0 120 120"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF6FB5"/><stop offset=".5" stop-color="#54A0FF"/><stop offset="1" stop-color="#1DD1A1"/></linearGradient></defs>
+      <circle cx="60" cy="60" r="52" fill="none" stroke="#F1ECDF" stroke-width="10"/>
+      <circle id="arc" cx="60" cy="60" r="52" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round" stroke-dasharray="326.73" stroke-dashoffset="0"/>
+    </svg>
+    <div class="time"><div class="big" id="tsTime">25:00</div><div class="paused" id="tsPaused">DURAKLATILDI</div></div>
+  </div>
+  <div class="ts-quote" id="tsQuote"></div>
+  <div class="ts-silent">🔕 Telefon sessizde, sen işindesin.</div>
+  <div class="ts-actions">
+    <button class="btn-orange" id="tsPause" type="button">⏸ Duraklat</button>
+    <button class="btn-green" id="tsDone" type="button">✓ Bitirdim</button>
+    <button class="btn-ghost" id="tsStop" type="button">✕ Durdur</button>
+  </div>
+</div>
+
+<!-- Finished -->
+<div class="overlay" id="endOverlay" role="dialog" aria-modal="true" aria-labelledby="endTitle">
+  <div class="modal" style="border-top-color:var(--pink)">
+    <h3 id="endTitle">⏰ Süre doldu!</h3>
+    <p class="for" id="endFor"></p>
+    <div class="actions" style="margin-top:4px">
+      <button class="btn-green" id="endDone" type="button">✓ İşi bitirdim</button>
+      <button class="btn-orange" id="endMore" type="button">+5 dk daha</button>
+    </div>
+    <div class="actions" style="margin-top:8px">
+      <button class="btn-blue" id="endBreak" type="button">☕ 5 dk mola</button>
+      <button class="btn-ghost" id="endClose" type="button">Listeye dön</button>
+    </div>
+    <span class="lbl">➡️ Sıradaki iş için zamanlayıcı kur</span>
+    <div class="next-list" id="nextList"></div>
+    <p class="hint">📱 Ara verdiğinde gelen mesajlara bakabilirsin. Sonraki işe başlarken telefonu yine sessize almayı unutma.</p>
+  </div>
+</div>
+
+<div class="confetti" id="confetti"></div>
+
+<script>
+(function(){
+  "use strict";
+  const COLORS = ["#FF6B6B","#FF9F43","#FECA57","#1DD1A1","#48DBFB","#54A0FF","#5F27CD","#FF6FB5"];
+  const QUOTES = [
+    "Küçük adımlar büyük yolculukların başlangıcıdır.",
+    "Bugün yaptığın, yarınki seni şekillendirir.",
+    "Mükemmel olmak zorunda değilsin, sadece başla.",
+    "Disiplin, motivasyon bittiğinde devreye girer.",
+    "Kendine inan. Sandığından daha güçlüsün.",
+    "Bir gün ya da birinci gün. Karar senin.",
+    "Yavaş ilerlemek, hiç ilerlememekten iyidir.",
+    "Odaklan. Bu dakikalar sana ait.",
+    "Bitirdiğin her iş, kendine verdiğin bir sözdür.",
+    "Şimdi zor, sonra gurur."
+  ];
+  const LS_KEY = "odak-zamani-v1";
+  const LS_TIMER = "odak-zamani-timer-v1";
+  const $ = id => document.getElementById(id);
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+  // ---------- State ----------
+  let state = { today: [], library: [] };
+  try { const s = JSON.parse(localStorage.getItem(LS_KEY) || "null"); if (s && Array.isArray(s.today)) state = { today: s.today, library: s.library || [] }; } catch(e){}
+
+  // ---------- Cloud sync (per-person, private) ----------
+  let docRef = null, writing = false, pending = false, debounce = null;
+  const syncEl = $("sync");
+  function setSync(t){ syncEl.textContent = t; }
+  setSync("Bu cihazda kaydediliyor…");
+
+  function persist(){
+    try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){}
+    if (!docRef) return;
+    clearTimeout(debounce);
+    debounce = setTimeout(flush, 600);
+  }
+  async function flush(){
+    if (!docRef) return;
+    if (writing) { pending = true; return; }
+    writing = true;
+    try {
+      await docRef.set({ today: state.today, library: state.library, updatedAt: Date.now() });
+      setSync("✓ Hesabına kaydedildi. Telefon ve bilgisayarda aynı liste.");
+    } catch(e){
+      if (e && e.code === "unavailable") { setTimeout(flush, 1500 + Math.random()*1000); }
+      else setSync("Bu cihazda kaydedildi (hesaba kaydedilemedi).");
+    } finally {
+      writing = false;
+      if (pending) { pending = false; flush(); }
+    }
+  }
+
+  (async function initCloud(){
+    try {
+      if (!window.claude || !window.claude.use) { setSync("Bu cihazda kaydediliyor."); return; }
+      const [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+      if (!db || !user) { setSync("Bu cihazda kaydediliyor."); return; }
+      const id = await user.id();
+      if (!id) { setSync("Bu cihazda kaydediliyor."); return; }
+      const ref = db.doc("data/users/" + id + "/odak");
+      const t = setTimeout(() => setSync("Hesaba ulaşılamadı. Şimdilik bu cihazda kaydediliyor."), 10000);
+      let first = true;
+      ref.onSnapshot(snap => {
+        clearTimeout(t);
+        if (snap.exists) {
+          const d = snap.data() || {};
+          if (snap.metadata.hasPendingWrites) return;
+          state = { today: Array.isArray(d.today) ? d.today.map(x=>({...x})) : [], library: Array.isArray(d.library) ? d.library.map(x=>({...x})) : [] };
+          try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){}
+          render();
+          setSync("✓ Hesabına kaydedildi. Telefon ve bilgisayarda aynı liste.");
+        } else if (first && !snap.metadata.fromCache) {
+          // first time: upload what this device has
+          docRef = ref;
+          if (state.today.length || state.library.length) flush(); else setSync("✓ Hesabına kaydediliyor.");
+        }
+        if (!snap.metadata.fromCache) first = false;
+        docRef = ref;
+      }, err => { clearTimeout(t); setSync("Bu cihazda kaydediliyor."); });
+    } catch(e){ setSync("Bu cihazda kaydediliyor."); }
+  })();
+
+  // ---------- Rendering ----------
+  function colorFor(i){ return COLORS[i % COLORS.length]; }
+  function inLibrary(title){ return state.library.some(l => l.title.trim().toLowerCase() === title.trim().toLowerCase()); }
+
+  function render(){
+    const list = $("taskList"); list.innerHTML = "";
+    if (!state.today.length) {
+      const li = document.createElement("li"); li.className = "empty";
+      li.textContent = "Henüz iş yok. Yukarıdan ekle ya da kayıtlı işlerinden seç 🌱";
+      list.appendChild(li);
+    }
+    state.today.forEach((t, i) => {
+      const li = document.createElement("li");
+      li.className = "task" + (t.done ? " done" : "");
+      li.style.borderLeftColor = colorFor(i);
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!t.done; cb.setAttribute("aria-label","Tamamlandı");
+      cb.onchange = () => { t.done = cb.checked; persist(); render(); if (cb.checked) burst(); };
+      const title = document.createElement("span"); title.className = "t-title"; title.textContent = t.title;
+      const chip = document.createElement("span"); chip.className = "chip"; chip.textContent = t.minutes + " dk";
+      const star = document.createElement("button"); star.type = "button";
+      const saved = inLibrary(t.title);
+      star.className = "icon-btn star" + (saved ? " on" : ""); star.textContent = saved ? "★" : "☆";
+      star.title = saved ? "Kayıtlı işlerden çıkar" : "Kayıtlı işlerime ekle";
+      star.onclick = () => { toggleLibrary(t); };
+      const play = document.createElement("button"); play.type = "button"; play.className = "play"; play.textContent = "▶ Başlat";
+      play.disabled = !!t.done;
+      play.onclick = () => openPre(t.id);
+      const del = document.createElement("button"); del.type = "button"; del.className = "icon-btn"; del.textContent = "🗑"; del.title = "Sil";
+      del.onclick = () => { state.today = state.today.filter(x => x.id !== t.id); persist(); render(); };
+      const acts = document.createElement("div"); acts.className = "t-actions";
+      acts.append(chip, star, play, del);
+      li.append(cb, title, acts);
+      list.appendChild(li);
+    });
+    const done = state.today.filter(t=>t.done).length;
+    $("countTag").textContent = done + "/" + state.today.length;
+
+    const lib = $("libList"); lib.innerHTML = "";
+    if (!state.library.length) {
+      const p = document.createElement("div"); p.className = "empty"; p.style.padding = "6px 0"; p.style.textAlign = "left";
+      p.textContent = "Kayıtlı işin yok. Bir işin yanındaki ☆ işaretine dokunarak kaydedebilirsin.";
+      lib.appendChild(p);
+    }
+    state.library.forEach((l, i) => {
+      const item = document.createElement("div"); item.className = "lib-item"; item.style.borderColor = colorFor(i) + "66";
+      const add = document.createElement("button"); add.type = "button"; add.className = "add";
+      add.textContent = "+ " + l.title + " · " + l.minutes + " dk"; add.title = "Bugünkü listeme ekle";
+      add.onclick = () => { state.today.push({ id: uid(), title: l.title, minutes: l.minutes, done: false }); persist(); render(); };
+      const x = document.createElement("button"); x.type = "button"; x.className = "x"; x.textContent = "✕"; x.title = "Kayıtlılardan sil";
+      x.onclick = () => { state.library = state.library.filter(y => y.id !== l.id); persist(); render(); };
+      item.append(add, x); lib.appendChild(item);
+    });
+  }
+
+  function toggleLibrary(t){
+    if (inLibrary(t.title)) state.library = state.library.filter(l => l.title.trim().toLowerCase() !== t.title.trim().toLowerCase());
+    else state.library.push({ id: uid(), title: t.title, minutes: t.minutes });
+    persist(); render();
+  }
+
+  // ---------- Add ----------
+  $("addForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const title = $("newTitle").value.trim(); if (!title) return;
+    let m = parseInt($("newMin").value, 10); if (!(m > 0)) m = 25; m = Math.min(m, 600);
+    state.today.push({ id: uid(), title, minutes: m, done: false });
+    if ($("newSave").checked && !inLibrary(title)) state.library.push({ id: uid(), title, minutes: m });
+    $("newTitle").value = ""; $("newTitle").focus();
+    persist(); render();
+  });
+  $("clearDone").onclick = () => { state.today = state.today.filter(t => !t.done); persist(); render(); };
+
+  // ---------- Audio ----------
+  let actx = null;
+  function unlockAudio(){
+    try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch(e){}
+  }
+  function chime(){
+    if (!actx) return;
+    try {
+      const notes = [523.25, 659.25, 783.99, 1046.5];
+      for (let r = 0; r < 3; r++) notes.forEach((f, i) => {
+        const o = actx.createOscillator(), g = actx.createGain();
+        o.type = "sine"; o.frequency.value = f;
+        const t0 = actx.currentTime + r * 1.1 + i * 0.16;
+        g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.35, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.5);
+        o.connect(g).connect(actx.destination); o.start(t0); o.stop(t0 + 0.55);
+      });
+    } catch(e){}
+    try { navigator.vibrate && navigator.vibrate([300,150,300,150,500]); } catch(e){}
+  }
+
+  // ---------- Pre-start reminder ----------
+  let preTaskId = null, preIsBreak = false;
+  const PRESETS = [5,10,15,25,30,45,60,90];
+  function buildPresets(sel){
+    const box = $("presets"); box.innerHTML = "";
+    PRESETS.forEach(m => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = m + " dk";
+      if (m === sel) b.className = "sel";
+      b.onclick = () => { $("preMin").value = m; buildPresets(m); };
+      box.appendChild(b);
+    });
+  }
+  $("preMin").addEventListener("input", () => buildPresets(parseInt($("preMin").value,10)));
+  function checkReady(){
+    const ok = [...document.querySelectorAll(".pc[data-req]")].every(c => c.checked);
+    $("preStart").disabled = !ok;
+  }
+  document.querySelectorAll(".pc").forEach(c => c.addEventListener("change", checkReady));
+  function openPre(taskId){
+    const t = state.today.find(x => x.id === taskId); if (!t) return;
+    preTaskId = taskId;
+    $("preFor").textContent = "İş: " + t.title;
+    $("preMin").value = t.minutes; buildPresets(t.minutes);
+    document.querySelectorAll(".pc").forEach(c => c.checked = false);
+    checkReady();
+    $("endOverlay").classList.remove("show");
+    $("preOverlay").classList.add("show");
+  }
+  $("preCancel").onclick = () => $("preOverlay").classList.remove("show");
+  $("preStart").onclick = () => {
+    unlockAudio();
+    const t = state.today.find(x => x.id === preTaskId); if (!t) return;
+    let m = parseInt($("preMin").value, 10); if (!(m > 0)) m = t.minutes; m = Math.min(m, 600);
+    if (m !== t.minutes) { t.minutes = m; persist(); render(); }
+    $("preOverlay").classList.remove("show");
+    startTimer({ taskId: t.id, title: t.title, total: m * 60000, isBreak: false });
+  };
+
+  // ---------- Timer ----------
+  let timer = null; // {taskId,title,total,endAt,remaining,paused,isBreak}
+  let tick = null, quoteTick = null;
+  const ARC = 326.73;
+  const baseTitle = document.title;
+
+  function saveTimer(){ try { timer ? localStorage.setItem(LS_TIMER, JSON.stringify(timer)) : localStorage.removeItem(LS_TIMER); } catch(e){} }
+  function startTimer(opts){
+    timer = { ...opts, endAt: Date.now() + opts.total, remaining: opts.total, paused: false };
+    saveTimer(); showTimer();
+  }
+  function showTimer(){
+    $("tsTask").textContent = timer.title;
+    $("tsLabel").textContent = timer.isBreak ? "Mola zamanı" : "Şu an odaklandığın iş";
+    $("tsDone").style.display = timer.isBreak ? "none" : "";
+    $("timerScreen").classList.add("show");
+    rotateQuote(); clearInterval(quoteTick); quoteTick = setInterval(rotateQuote, 45000);
+    clearInterval(tick); tick = setInterval(update, 250); update();
+  }
+  function rotateQuote(){
+    const q = timer && timer.isBreak ? "Derin bir nefes al, biraz esne, su iç 🌿" : QUOTES[Math.floor(Math.random()*QUOTES.length)];
+    $("tsQuote").textContent = q;
+  }
+  function fmt(ms){ const s = Math.max(0, Math.ceil(ms/1000)); const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), ss = s%60;
+    return (h ? h + ":" + String(m).padStart(2,"0") : String(m).padStart(2,"0")) + ":" + String(ss).padStart(2,"0"); }
+  function update(){
+    if (!timer) return;
+    const rem = timer.paused ? timer.remaining : timer.endAt - Date.now();
+    $("tsTime").textContent = fmt(rem);
+    $("arc").setAttribute("stroke-dashoffset", String(ARC * (1 - Math.max(0, rem) / timer.total)));
+    $("tsPaused").style.visibility = timer.paused ? "visible" : "hidden";
+    $("tsPause").textContent = timer.paused ? "▶ Devam et" : "⏸ Duraklat";
+    document.title = (timer.paused ? "⏸ " : "⏳ ") + fmt(rem) + " · " + timer.title;
+    if (!timer.paused && rem <= 0) finish();
+  }
+  $("tsPause").onclick = () => {
+    unlockAudio();
+    if (!timer) return;
+    if (timer.paused) { timer.endAt = Date.now() + timer.remaining; timer.paused = false; }
+    else { timer.remaining = timer.endAt - Date.now(); timer.paused = true; }
+    saveTimer(); update();
+  };
+  function closeTimer(){
+    clearInterval(tick); clearInterval(quoteTick);
+    $("timerScreen").classList.remove("show");
+    document.title = baseTitle;
+  }
+  $("tsStop").onclick = () => { closeTimer(); timer = null; saveTimer(); };
+  $("tsDone").onclick = () => {
+    if (!timer) return;
+    const t = state.today.find(x => x.id === timer.taskId); if (t) { t.done = true; persist(); render(); }
+    const last = timer; closeTimer(); timer = null; saveTimer(); burst();
+    showEnd(last, true);
+  };
+  function finish(){
+    const last = timer; closeTimer(); timer = null; saveTimer();
+    chime(); burst();
+    showEnd(last, false);
+  }
+  let lastFinished = null;
+  function showEnd(last, alreadyDone){
+    lastFinished = last;
+    if (last.isBreak) {
+      $("endTitle").textContent = "🌿 Mola bitti!";
+      $("endFor").textContent = "Hazırsan sıradaki işi seç. Başlamadan önce telefonunu yine sessize al.";
+    } else if (alreadyDone) {
+      $("endTitle").textContent = "🎉 Harika, bitirdin!";
+      $("endFor").textContent = "“" + last.title + "” tamamlandı. Kendinle gurur duy!";
+    } else {
+      $("endTitle").textContent = "⏰ Süre doldu!";
+      $("endFor").textContent = "“" + last.title + "” için ayırdığın süre bitti. Bitirdin mi?";
+    }
+    const showDoneBtns = !last.isBreak && !alreadyDone;
+    $("endDone").style.display = showDoneBtns ? "" : "none";
+    $("endMore").style.display = showDoneBtns ? "" : "none";
+    $("endBreak").style.display = last.isBreak ? "none" : "";
+    const nl = $("nextList"); nl.innerHTML = "";
+    const next = state.today.filter(t => !t.done && t.id !== (showDoneBtns ? null : last.taskId));
+    if (!next.length) { const d = document.createElement("div"); d.className = "hint"; d.textContent = "Bekleyen işin kalmadı 🎊 Listeye dönüp yeni iş ekleyebilirsin."; nl.appendChild(d); }
+    next.forEach(t => {
+      const b = document.createElement("button"); b.type = "button";
+      const a = document.createElement("span"); a.textContent = "▶ " + t.title;
+      const c = document.createElement("span"); c.className = "chip"; c.textContent = t.minutes + " dk";
+      b.append(a, c); b.onclick = () => openPre(t.id); nl.appendChild(b);
+    });
+    $("endOverlay").classList.add("show");
+  }
+  $("endDone").onclick = () => {
+    const t = lastFinished && state.today.find(x => x.id === lastFinished.taskId);
+    if (t) { t.done = true; persist(); render(); burst(); }
+    showEnd(lastFinished, true);
+  };
+  $("endMore").onclick = () => {
+    unlockAudio(); $("endOverlay").classList.remove("show");
+    startTimer({ taskId: lastFinished.taskId, title: lastFinished.title, total: 5*60000, isBreak: false });
+  };
+  $("endBreak").onclick = () => {
+    unlockAudio(); $("endOverlay").classList.remove("show");
+    startTimer({ taskId: null, title: "☕ Mola", total: 5*60000, isBreak: true });
+  };
+  $("endClose").onclick = () => $("endOverlay").classList.remove("show");
+
+  // restore running timer after reload
+  try {
+    const saved = JSON.parse(localStorage.getItem(LS_TIMER) || "null");
+    if (saved && saved.total) {
+      timer = saved;
+      if (!timer.paused && timer.endAt - Date.now() <= 0) { const last = timer; timer = null; saveTimer(); setTimeout(() => showEnd(last, false), 50); }
+      else showTimer();
+    }
+  } catch(e){}
+
+  // ---------- Confetti ----------
+  function burst(){
+    const box = $("confetti");
+    for (let i = 0; i < 60; i++) {
+      const p = document.createElement("i");
+      p.style.left = Math.random()*100 + "vw";
+      p.style.background = COLORS[i % COLORS.length];
+      p.style.animationDelay = (Math.random()*0.6) + "s";
+      p.style.animationDuration = (1.8 + Math.random()*1.4) + "s";
+      box.appendChild(p);
+      setTimeout(() => p.remove(), 3800);
+    }
+  }
+
+  $("topQuote").textContent = QUOTES[new Date().getDate() % QUOTES.length];
+  render();
+})();
+</script>
+</body>
+</html>
