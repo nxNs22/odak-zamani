@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Odak Zamanı — Yapılacaklar ve Zamanlayıcı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFDF7; --ink:#2D3047; --muted:#7A7F96; --line:#ECE7DA; --card:#fff;
+    --red:#FF6B6B; --orange:#FF9F43; --yellow:#FECA57; --green:#1DD1A1;
+    --cyan:#48DBFB; --blue:#54A0FF; --purple:#5F27CD; --pink:#FF6FB5;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:"Nunito",system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);background:var(--bg);
+    background-image:
+      radial-gradient(circle at 12% 18%, #FF6B6B22 0 3px, transparent 4px),
+      radial-gradient(circle at 78% 8%, #54A0FF22 0 4px, transparent 5px),
+      radial-gradient(circle at 40% 70%, #1DD1A122 0 3px, transparent 4px),
+      radial-gradient(circle at 90% 60%, #FECA5733 0 4px, transparent 5px),
+      radial-gradient(circle at 60% 35%, #FF6FB522 0 3px, transparent 4px);
+    background-size:220px 220px; min-height:100vh;
+  }
+  .rainbow{height:6px;background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow),var(--green),var(--cyan),var(--blue),var(--purple),var(--pink))}
+  .wrap{max-width:760px;margin:0 auto;padding:22px 16px 60px}
+  header{text-align:center;margin:10px 0 18px}
+  h1{font-size:clamp(28px,6vw,40px);font-weight:900;margin:0;letter-spacing:.5px;
+     background:linear-gradient(90deg,var(--red),var(--orange),var(--green),var(--blue),var(--purple),var(--pink));
+     -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--muted);margin:6px 0 0;font-weight:600}
+  .quote{margin:14px auto 0;display:inline-block;padding:8px 16px;border-radius:999px;background:#5F27CD14;color:var(--purple);font-weight:700;font-style:italic}
+  .card{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:18px;margin:16px 0;box-shadow:0 6px 0 #0000000a}
+  .card h2{margin:0 0 12px;font-size:19px;font-weight:900;display:flex;align-items:center;gap:8px}
+  .card h2 .tag{font-size:12px;font-weight:800;color:#fff;border-radius:999px;padding:2px 9px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  input[type=text],input[type=number]{font:inherit;font-weight:700;color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:11px 13px;background:#fff;outline:none;min-width:0}
+  input:focus{border-color:var(--blue)}
+  #newTitle{flex:1 1 220px}
+  .min-wrap{display:flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:14px;padding:0 10px;background:#fff}
+  .min-wrap input{border:none;width:58px;padding:11px 0;text-align:right}
+  .min-wrap span{color:var(--muted);font-weight:700}
+  button{font:inherit;font-weight:800;border:none;border-radius:14px;padding:11px 16px;cursor:pointer;transition:transform .08s, filter .15s}
+  button:active{transform:scale(.97)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .btn{background:var(--ink);color:#fff}
+  .btn-green{background:var(--green);color:#fff}
+  .btn-blue{background:var(--blue);color:#fff}
+  .btn-pink{background:var(--pink);color:#fff}
+  .btn-orange{background:var(--orange);color:#fff}
+  .btn-ghost{background:#F3F0E7;color:var(--ink)}
+  .save-check{display:flex;align-items:center;gap:6px;color:var(--muted);font-weight:700;font-size:14px;margin-top:10px;cursor:pointer;user-select:none}
+  .save-check input{width:18px;height:18px;accent-color:var(--orange)}
+
+  .tasks{list-style:none;margin:0;padding:0}
+  .task{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border-radius:16px;margin-bottom:8px;border:2px solid var(--line);background:#fff;border-left-width:7px}
+  .task.done .t-title{text-decoration:line-through;color:var(--muted)}
+  .task input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:var(--green);cursor:pointer}
+  .task{flex-wrap:wrap}
+  .t-title{flex:1 1 150px;font-weight:800;word-break:break-word;min-width:0}
+  .t-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
+  .chip{font-size:13px;font-weight:800;border-radius:999px;padding:3px 9px;background:#F3F0E7;color:var(--ink);white-space:nowrap}
+  .icon-btn{background:transparent;padding:6px 8px;font-size:18px;border-radius:10px;line-height:1}
+  .icon-btn:hover{background:#F3F0E7}
+  .star.on{color:var(--orange)} .star{color:#C9C5B8}
+  .play{background:var(--green);color:#fff;padding:8px 13px;font-size:14px}
+  .empty{color:var(--muted);text-align:center;padding:14px;font-weight:700}
+  .lib{display:flex;flex-wrap:wrap;gap:8px}
+  .lib-item{display:flex;align-items:center;border-radius:999px;border:2px solid var(--line);background:#fff;overflow:hidden}
+  .lib-item button{border-radius:0;background:transparent;padding:8px 12px;font-weight:800}
+  .lib-item .add{color:var(--ink)}
+  .lib-item .add:hover{background:#1DD1A11a}
+  .lib-item .x{color:#C0BBAE;padding:8px 10px;border-left:2px solid var(--line)}
+  .lib-item .x:hover{color:var(--red)}
+  .hint{color:var(--muted);font-size:13.5px;font-weight:600;margin:10px 0 0}
+  .foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
+  .sync{font-size:12.5px;color:var(--muted);font-weight:700}
+
+  /* Overlays */
+  .overlay{position:fixed;inset:0;background:#2D304799;display:none;align-items:center;justify-content:center;padding:16px;z-index:50;backdrop-filter:blur(3px)}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:24px;max-width:470px;width:100%;padding:22px;max-height:92vh;overflow:auto;border-top:8px solid var(--orange)}
+  .modal h3{margin:0 0 4px;font-size:22px;font-weight:900}
+  .modal .for{color:var(--muted);font-weight:700;margin:0 0 14px}
+  .check{display:flex;gap:12px;align-items:flex-start;padding:12px;border:2px solid var(--line);border-radius:16px;margin-bottom:9px;cursor:pointer;user-select:none}
+  .check input{width:22px;height:22px;flex:none;margin-top:2px;accent-color:var(--green)}
+  .check.req b::after{content:" *";color:var(--red)}
+  .check small{display:block;color:var(--muted);font-weight:600;margin-top:2px}
+  .check:has(input:checked){border-color:var(--green);background:#1DD1A10f}
+  .presets{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+  .presets button{background:#F3F0E7;color:var(--ink);padding:8px 12px}
+  .presets button.sel{background:var(--blue);color:#fff}
+  .lbl{font-weight:900;margin:14px 0 4px;display:block}
+  .actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+  .actions button{flex:1}
+
+  /* Timer screen */
+  #timerScreen{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;
+    background:radial-gradient(circle at 50% 40%, #fff 0, #FFF6E5 60%, #FFE9F3 100%)}
+  #timerScreen.show{display:flex}
+  .ts-task{font-size:clamp(20px,5vw,28px);font-weight:900;text-align:center;max-width:600px;margin:0 0 4px}
+  .ts-label{color:var(--muted);font-weight:800;letter-spacing:1.5px;font-size:13px;text-transform:uppercase}
+  .ring{position:relative;width:min(78vw,320px);aspect-ratio:1;margin:22px 0}
+  .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .ring .time{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
+  .ring .big{font-size:clamp(48px,14vw,72px);font-weight:900;font-variant-numeric:tabular-nums}
+  .ring .paused{color:var(--orange);font-weight:900;font-size:14px;letter-spacing:1px;visibility:hidden}
+  .ts-quote{color:var(--purple);font-style:italic;font-weight:700;text-align:center;max-width:520px;min-height:1.4em}
+  .ts-silent{margin-top:10px;font-size:13.5px;color:var(--muted);font-weight:700}
+  .ts-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;justify-content:center}
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+  .confetti i{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;animation:fall 2.4s linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.7}}
+  .next-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+  .next-list button{background:#F3F0E7;color:var(--ink);text-align:left;display:flex;justify-content:space-between;gap:8px}
+  .next-list button:hover{background:#1DD1A122}
+
+  /* Tabs */
+  .tabs{display:flex;gap:6px;background:#fff;border:2px solid var(--line);border-radius:18px;padding:5px;margin:4px 0 6px;position:sticky;top:8px;z-index:20;box-shadow:0 4px 0 #0000000a}
+  .tabs button{flex:1;background:transparent;color:var(--muted);padding:11px 10px;border-radius:13px;font-size:15.5px}
+  .tabs button.on{background:var(--ink);color:#fff}
+  /* Month view */
+  .m-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .m-head h2{margin:0;font-size:22px;font-weight:900;text-align:center;flex:1}
+  .m-nav{background:#F3F0E7;color:var(--ink);padding:9px 14px;font-size:18px}
+  .goal{width:100%;margin-top:12px}
+  .note{background:#FFF3C4;border:2px solid var(--orange);border-radius:20px;padding:16px 18px;margin:16px 0;text-align:center}
+  .note h3{margin:0 0 6px;color:#E8590C;font-size:18px;font-weight:900;font-style:italic}
+  .note p{margin:0;font-style:italic;font-weight:600;line-height:1.55}
+  .prog{height:14px;background:#F1ECDF;border-radius:999px;overflow:hidden;margin-top:10px}
+  .prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink),var(--blue),var(--green));transition:width .3s}
+  .prog-txt{display:flex;justify-content:space-between;font-weight:800;font-size:13.5px;color:var(--muted);margin-top:6px}
+  .days{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+  .day{background:#fff;border:2px solid;border-radius:18px;display:flex;overflow:hidden}
+  .day.today{box-shadow:0 0 0 4px #FECA5788}
+  .day-side{width:58px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 0}
+  .day-num{width:38px;height:38px;border-radius:50%;color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:17px}
+  .day-wd{font-size:10.5px;font-weight:900;letter-spacing:.5px}
+  .day-badge{font-size:9.5px;font-weight:900;color:#fff;background:var(--ink);border-radius:999px;padding:1px 6px}
+  .day-body{flex:1;padding:8px 8px 8px 4px;min-width:0}
+  .item{display:flex;align-items:center;gap:6px;padding:2px 0}
+  .item input[type=checkbox]{width:19px;height:19px;flex:none;cursor:pointer}
+  .item input[type=text]{flex:1;border:none;border-bottom:1.5px dashed #D9D4C5;border-radius:0;padding:6px 2px;font-weight:700;font-size:14.5px;background:transparent;min-width:0}
+  .item input[type=text]:focus{border-bottom-color:var(--blue)}
+  .item.done input[type=text]{text-decoration:line-through;color:var(--muted)}
+  .send{background:transparent;padding:4px 6px;font-size:15px;border-radius:8px;opacity:.55}
+  .send:hover{opacity:1;background:#F3F0E7}
+  .send[hidden]{display:none}
+  .endbox{background:#FFE1F0;border:2px solid var(--pink);border-radius:20px;padding:16px 18px;margin:16px 0;text-align:center}
+  .endbox h3{margin:0;color:#D6336C;font-weight:900;font-size:19px}
+  .endbox .big{font-size:32px;font-weight:900;color:var(--ink);margin:6px 0 2px}
+  .reflect{background:#EAF7FF;border:2px solid var(--blue);border-radius:20px;padding:16px 18px}
+  .reflect h3{margin:0 0 6px;color:#2E6FD8;text-align:center;font-style:italic;font-weight:900}
+  .reflect label{display:block;font-weight:900;margin:12px 0 4px}
+  .reflect textarea{width:100%;min-height:70px;font:inherit;font-weight:600;border:2px solid #CFE0F5;border-radius:14px;padding:10px;resize:vertical;background:#fff;color:var(--ink)}
+  .pdf-btn{display:none;text-decoration:none;text-align:center;margin-top:12px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;font-weight:800;padding:12px 18px;border-radius:14px;z-index:70;transition:transform .25s;max-width:90vw;text-align:center}
+  .toast{visibility:hidden}
+  .toast.show{transform:translateX(-50%) translateY(0);visibility:visible}
+  @media (max-width:460px){.tabs button{font-size:13.5px;padding:10px 4px}.kpi .v{font-size:24px}}
+
+  /* Stats */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .kpi{background:#fff;border:2px solid var(--line);border-radius:18px;padding:14px}
+  .kpi .v{font-size:27px;font-weight:900;line-height:1.1;font-variant-numeric:tabular-nums}
+  .kpi .l{font-size:13px;font-weight:800;color:var(--muted);margin-top:3px}
+  .kpi .ic{font-size:18px}
+  .chart-wrap{position:relative}
+  .chart{width:100%;height:auto;display:block;overflow:visible}
+  .chart text{font-family:inherit;font-size:10px;fill:#7A7F96;font-weight:700}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;font-weight:800;color:var(--ink);margin:0 0 8px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:12.5px;font-weight:700;border-radius:10px;padding:7px 10px;white-space:nowrap;transform:translate(-50%,-110%);display:none;z-index:5}
+  .tip b{font-weight:900}
+  .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+  .lst{list-style:none;margin:0;padding:0;max-height:340px;overflow:auto}
+  .lst li{display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1.5px dashed var(--line);font-weight:700}
+  .lst li:last-child{border-bottom:none}
+  .lst .dt{font-size:12px;font-weight:900;color:var(--muted);white-space:nowrap;min-width:48px}
+  .lst .tt{flex:1;word-break:break-word}
+  .lst .mv{background:#F3F0E7;color:var(--ink);padding:5px 9px;font-size:12.5px;border-radius:10px;white-space:nowrap}
+  .insight{background:#5F27CD10;border-radius:16px;padding:12px 14px;font-weight:700;color:var(--ink);line-height:1.5}
+</style>
+</head>
+<body>
+<div class="rainbow"></div>
+<div class="wrap">
+  <header>
+    <h1>Odak Zamanı</h1>
+    <p class="sub">İşini yaz, süreni kur, telefonu sessize al. Gerisi kolay!</p>
+    <div class="quote" id="topQuote">Küçük adımlar büyük yolculukların başlangıcıdır.</div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button type="button" id="tabFocus" class="on" role="tab">⏱️ Odak</button>
+    <button type="button" id="tabMonth" role="tab">📅 Aylık Liste</button>
+    <button type="button" id="tabStats" role="tab">📊 İstatistik</button>
+  </nav>
+
+  <div id="viewFocus">
+  <section class="card">
+    <h2>✏️ Yeni iş ekle</h2>
+    <form id="addForm" class="row" autocomplete="off">
+      <input type="text" id="newTitle" placeholder="Örn: 20 sayfa kitap oku" maxlength="120" required>
+      <label class="min-wrap" title="Süre (dakika)"><input type="number" id="newMin" min="1" max="600" value="25"><span>dk</span></label>
+      <button class="btn-green" type="submit">Ekle</button>
+    </form>
+    <label class="save-check"><input type="checkbox" id="newSave"> ⭐ Kayıtlı işlerime de ekle (bir dahakine yeniden yazmayayım)</label>
+  </section>
+
+  <section class="card">
+    <h2>📋 Bugünkü işlerim <span class="tag" id="countTag" style="background:var(--blue)">0/0</span></h2>
+    <ul class="tasks" id="taskList"></ul>
+    <div class="foot">
+      <span class="hint">▶ ile zamanlayıcıyı başlat · ⭐ ile işi kaydet</span>
+      <button class="btn-ghost" id="clearDone" type="button">Bitenleri temizle</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>⭐ Kayıtlı işlerim</h2>
+    <div class="lib" id="libList"></div>
+    <p class="hint">Bir kayıtlı işe dokun, bugünkü listene eklensin. Tekrar yazmana gerek yok.</p>
+  </section>
+  </div>
+
+  <div id="viewMonth" hidden>
+    <section class="card">
+      <div class="m-head">
+        <button type="button" class="m-nav" id="mPrev" aria-label="Önceki ay">‹</button>
+        <h2 id="mTitle"></h2>
+        <button type="button" class="m-nav" id="mNext" aria-label="Sonraki ay">›</button>
+      </div>
+      <input type="text" class="goal" id="mGoal" placeholder="🎯 Bu ayın hedefi…" maxlength="160">
+      <div class="prog"><i id="mBar"></i></div>
+      <div class="prog-txt"><span id="mProg">0 / 0 tamamlandı</span><span id="mPct">%0</span></div>
+      <a class="btn btn-ghost pdf-btn" id="pdfBtn" href="Aylik_Yapilacaklar_Listesi.pdf" target="_blank" rel="noopener">🖨️ Yazdırılabilir PDF'i aç (A4)</a>
+    </section>
+    <div class="note">
+      <h3>Sana Bir Not ♥</h3>
+      <p>Bu sayfa senin yeni başlangıcın. Her gün sadece birkaç küçük şey yaz ve tamamladıkça kutucuğu işaretle. Unutma: büyük başarılar bir gecede gelmez, her gün tekrarlanan küçük çabalarla gelir. Kötü bir gün geçirirsen kendine kızma. Yarın yeni bir sayfa, yeni bir şans. Sen bu ayın kahramanısın. Haydi başlayalım!</p>
+    </div>
+    <p class="hint" style="margin:0 0 10px">⏱ işaretine dokunursan o iş, zamanlayıcıyla başlatabilmen için Odak sekmesine eklenir.</p>
+    <div class="days" id="days"></div>
+    <div class="endbox">
+      <h3>★ AY SONU ★</h3>
+      <div class="big" id="endCount">0 / 0</div>
+      <div style="font-weight:700;font-style:italic">Başardın! Kendinle gurur duy.</div>
+    </div>
+    <div class="reflect">
+      <h3>Ayın Değerlendirmesi</h3>
+      <label for="r0">Bu ay en çok gurur duyduğum şey:</label><textarea id="r0" data-r="0"></textarea>
+      <label for="r1">Zorlandığım ve öğrendiğim şey:</label><textarea id="r1" data-r="1"></textarea>
+      <label for="r2">Gelecek ay için hedefim:</label><textarea id="r2" data-r="2"></textarea>
+    </div>
+  </div>
+
+  
+  <div id="viewStats" hidden>
+    <section class="card">
+      <div class="m-head">
+        <button type="button" class="m-nav" id="sPrev" aria-label="Önceki ay">‹</button>
+        <h2 id="sTitle"></h2>
+        <button type="button" class="m-nav" id="sNext" aria-label="Sonraki ay">›</button>
+      </div>
+    </section>
+    <div class="kpis" id="kpis"></div>
+    <section class="card">
+      <h2>💡 Özet</h2>
+      <div class="insight" id="insight"></div>
+    </section>
+    <section class="card">
+      <h2>📅 Günlük: yaptıklarım ve yapamadıklarım</h2>
+      <div class="legend"><span><i style="background:#0FA37F"></i>✓ Yaptım</span><span><i style="background:repeating-linear-gradient(45deg,#E5484D 0 3px,#F59A9D 3px 5px)"></i>✗ Yapamadım</span></div>
+      <div class="chart-wrap" id="c1"></div>
+    </section>
+    <section class="card">
+      <h2>⏱️ Günlük odak süresi (dakika)</h2>
+      <div class="chart-wrap" id="c2"></div>
+    </section>
+    <div class="two">
+      <section class="card" style="margin-top:0">
+        <h2>✅ Yaptıklarım <span class="tag" id="doneTag" style="background:#0FA37F">0</span></h2>
+        <ul class="lst" id="doneList"></ul>
+      </section>
+      <section class="card" style="margin-top:0">
+        <h2>❌ Yapamadıklarım <span class="tag" id="missTag" style="background:#E5484D">0</span></h2>
+        <ul class="lst" id="missList"></ul>
+        <p class="hint">“Bugüne taşı” ile yapamadığın işi bugünün kartına ekleyebilirsin.</p>
+      </section>
+    </div>
+  </div>
+
+  <div class="foot"><span class="sync" id="sync">Kaydediliyor…</span></div>
+</div>
+
+<!-- Pre-start reminder -->
+<div class="overlay" id="preOverlay" role="dialog" aria-modal="true" aria-labelledby="preTitle">
+  <div class="modal">
+    <h3 id="preTitle">🔕 Başlamadan önce</h3>
+    <p class="for" id="preFor"></p>
+    <label class="check req"><input type="checkbox" class="pc" data-req="1"><div><b>📱 Telefonumu sessize aldım</b><small>Rahatsız Etmeyin / Odak modunu aç, ekranı ters çevir.</small></div></label>
+    <label class="check req"><input type="checkbox" class="pc" data-req="1"><div><b>💻 Bilgisayar bildirimlerini kapattım</b><small>Windows: Odak / Rahatsız Etmeyin · Mac: Denetim Merkezi → Odak.</small></div></label>
+    <label class="check"><input type="checkbox" class="pc"><div><b>🗂️ Gereksiz sekme ve uygulamaları kapattım</b><small>Sadece bu iş için gerekenler açık kalsın.</small></div></label>
+    <label class="check"><input type="checkbox" class="pc"><div><b>💧 Suyum yanımda</b><small>Kalkmana gerek kalmasın.</small></div></label>
+    <span class="lbl">⏱️ Süre</span>
+    <div class="presets" id="presets"></div>
+    <label class="min-wrap" style="display:inline-flex"><input type="number" id="preMin" min="1" max="600" value="25"><span>dakika</span></label>
+    <div class="actions">
+      <button class="btn-ghost" id="preCancel" type="button">Vazgeç</button>
+      <button class="btn-green" id="preStart" type="button" disabled>Hazırım, başla! 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- Timer screen -->
+<div id="timerScreen" aria-live="polite">
+  <div class="ts-label" id="tsLabel">Şu an odaklandığın iş</div>
+  <h2 class="ts-task" id="tsTask"></h2>
+  <div class="ring">
+    <svg viewBox="0 0 120 120"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF6FB5"/><stop offset=".5" stop-color="#54A0FF"/><stop offset="1" stop-color="#1DD1A1"/></linearGradient></defs>
+      <circle cx="60" cy="60" r="52" fill="none" stroke="#F1ECDF" stroke-width="10"/>
+      <circle id="arc" cx="60" cy="60" r="52" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round" stroke-dasharray="326.73" stroke-dashoffset="0"/>
+    </svg>
+    <div class="time"><div class="big" id="tsTime">25:00</div><div class="paused" id="tsPaused">DURAKLATILDI</div></div>
+  </div>
+  <div class="ts-quote" id="tsQuote"></div>
+  <div class="ts-silent">🔕 Telefon sessizde, sen işindesin.</div>
+  <div class="ts-actions">
+    <button class="btn-orange" id="tsPause" type="button">⏸ Duraklat</button>
+    <button class="btn-green" id="tsDone" type="button">✓ Bitirdim</button>
+    <button class="btn-ghost" id="tsStop" type="button">✕ Durdur</button>
+  </div>
+</div>
+
+<!-- Finished -->
+<div class="overlay" id="endOverlay" role="dialog" aria-modal="true" aria-labelledby="endTitle">
+  <div class="modal" style="border-top-color:var(--pink)">
+    <h3 id="endTitle">⏰ Süre doldu!</h3>
+    <p class="for" id="endFor"></p>
+    <div class="actions" style="margin-top:4px">
+      <button class="btn-green" id="endDone" type="button">✓ İşi bitirdim</button>
+      <button class="btn-orange" id="endMore" type="button">+5 dk daha</button>
+    </div>
+    <div class="actions" style="margin-top:8px">
+      <button class="btn-blue" id="endBreak" type="button">☕ 5 dk mola</button>
+      <button class="btn-ghost" id="endClose" type="button">Listeye dön</button>
+    </div>
+    <span class="lbl">➡️ Sıradaki iş için zamanlayıcı kur</span>
+    <div class="next-list" id="nextList"></div>
+    <p class="hint">📱 Ara verdiğinde gelen mesajlara bakabilirsin. Sonraki işe başlarken telefonu yine sessize almayı unutma.</p>
+  </div>
+</div>
+
+<div class="confetti" id="confetti"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  const COLORS = ["#FF6B6B","#FF9F43","#FECA57","#1DD1A1","#48DBFB","#54A0FF","#5F27CD","#FF6FB5"];
+  const QUOTES = [
+    "Küçük adımlar büyük yolculukların başlangıcıdır.",
+    "Bugün yaptığın, yarınki seni şekillendirir.",
+    "Mükemmel olmak zorunda değilsin, sadece başla.",
+    "Disiplin, motivasyon bittiğinde devreye girer.",
+    "Kendine inan. Sandığından daha güçlüsün.",
+    "Bir gün ya da birinci gün. Karar senin.",
+    "Yavaş ilerlemek, hiç ilerlememekten iyidir.",
+    "Odaklan. Bu dakikalar sana ait.",
+    "Bitirdiğin her iş, kendine verdiğin bir sözdür.",
+    "Şimdi zor, sonra gurur."
+  ];
+  const LS_KEY = "odak-zamani-v1";
+  const LS_TIMER = "odak-zamani-timer-v1";
+  const $ = id => document.getElementById(id);
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+  // ---------- State ----------
+  let state = { today: [], library: [], months: {}, events: [] };
+  try { const s = JSON.parse(localStorage.getItem(LS_KEY) || "null"); if (s && Array.isArray(s.today)) state = { today: s.today, library: s.library || [], months: (s.months && typeof s.months === "object") ? s.months : {}, events: Array.isArray(s.events) ? s.events : [] }; } catch(e){}
+
+  // ---------- Cloud sync (per-person, private) ----------
+  let docRef = null, writing = false, pending = false, debounce = null;
+  const syncEl = $("sync");
+  function setSync(t){ syncEl.textContent = t; }
+  setSync("Bu cihazda kaydediliyor…");
+
+  function persist(){
+    try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){}
+    if (!docRef) return;
+    clearTimeout(debounce);
+    debounce = setTimeout(flush, 600);
+  }
+  async function flush(){
+    if (!docRef) return;
+    if (writing) { pending = true; return; }
+    writing = true;
+    try {
+      await docRef.set({ today: state.today, library: state.library, months: state.months, events: state.events, updatedAt: Date.now() });
+      setSync("✓ Hesabına kaydedildi. Telefon ve bilgisayarda aynı liste.");
+    } catch(e){
+      if (e && e.code === "unavailable") { setTimeout(flush, 1500 + Math.random()*1000); }
+      else setSync("Bu cihazda kaydedildi (hesaba kaydedilemedi).");
+    } finally {
+      writing = false;
+      if (pending) { pending = false; flush(); }
+    }
+  }
+
+  (async function initCloud(){
+    try {
+      if (!window.claude || !window.claude.use) { setSync("Bu cihazda kaydediliyor."); return; }
+      const [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+      if (!db || !user) { setSync("Bu cihazda kaydediliyor."); return; }
+      const id = await user.id();
+      if (!id) { setSync("Bu cihazda kaydediliyor."); return; }
+      const ref = db.doc("data/users/" + id + "/odak");
+      const t = setTimeout(() => setSync("Hesaba ulaşılamadı. Şimdilik bu cihazda kaydediliyor."), 10000);
+      let first = true;
+      ref.onSnapshot(snap => {
+        clearTimeout(t);
+        if (snap.exists) {
+          const d = snap.data() || {};
+          if (snap.metadata.hasPendingWrites) return;
+          const incoming = { today: Array.isArray(d.today) ? d.today : [], library: Array.isArray(d.library) ? d.library : [], months: (d.months && typeof d.months === "object") ? d.months : {}, events: Array.isArray(d.events) ? d.events : [] };
+          if (JSON.stringify(incoming) !== JSON.stringify(state)) {
+            state = JSON.parse(JSON.stringify(incoming));
+            try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){}
+            render(); const ae = document.activeElement; if (!ae || !document.getElementById("viewMonth").contains(ae)) renderMonth(); if (!$("viewStats").hidden) renderStats();
+          }
+          setSync("✓ Hesabına kaydedildi. Telefon ve bilgisayarda aynı liste.");
+        } else if (first && !snap.metadata.fromCache) {
+          // first time: upload what this device has
+          docRef = ref;
+          if (state.today.length || state.library.length || Object.keys(state.months).length) flush(); else setSync("✓ Hesabına kaydediliyor.");
+        }
+        if (!snap.metadata.fromCache) first = false;
+        docRef = ref;
+      }, err => { clearTimeout(t); setSync("Bu cihazda kaydediliyor."); });
+    } catch(e){ setSync("Bu cihazda kaydediliyor."); }
+  })();
+
+  // ---------- Rendering ----------
+  function colorFor(i){ return COLORS[i % COLORS.length]; }
+  function inLibrary(title){ return state.library.some(l => l.title.trim().toLowerCase() === title.trim().toLowerCase()); }
+
+  function render(){
+    const list = $("taskList"); list.innerHTML = "";
+    if (!state.today.length) {
+      const li = document.createElement("li"); li.className = "empty";
+      li.textContent = "Henüz iş yok. Yukarıdan ekle ya da kayıtlı işlerinden seç 🌱";
+      list.appendChild(li);
+    }
+    state.today.forEach((t, i) => {
+      const li = document.createElement("li");
+      li.className = "task" + (t.done ? " done" : "");
+      li.style.borderLeftColor = colorFor(i);
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!t.done; cb.setAttribute("aria-label","Tamamlandı");
+      cb.onchange = () => { t.done = cb.checked; if (cb.checked) syncDone(t); persist(); render(); if (cb.checked) burst(); };
+      const title = document.createElement("span"); title.className = "t-title"; title.textContent = t.title;
+      const chip = document.createElement("span"); chip.className = "chip"; chip.textContent = t.minutes + " dk";
+      const star = document.createElement("button"); star.type = "button";
+      const saved = inLibrary(t.title);
+      star.className = "icon-btn star" + (saved ? " on" : ""); star.textContent = saved ? "★" : "☆";
+      star.title = saved ? "Kayıtlı işlerden çıkar" : "Kayıtlı işlerime ekle";
+      star.onclick = () => { toggleLibrary(t); };
+      const play = document.createElement("button"); play.type = "button"; play.className = "play"; play.textContent = "▶ Başlat";
+      play.disabled = !!t.done;
+      play.onclick = () => openPre(t.id);
+      const del = document.createElement("button"); del.type = "button"; del.className = "icon-btn"; del.textContent = "🗑"; del.title = "Sil";
+      del.onclick = () => { state.today = state.today.filter(x => x.id !== t.id); persist(); render(); };
+      const acts = document.createElement("div"); acts.className = "t-actions";
+      acts.append(chip, star, play, del);
+      li.append(cb, title, acts);
+      list.appendChild(li);
+    });
+    const done = state.today.filter(t=>t.done).length;
+    $("countTag").textContent = done + "/" + state.today.length;
+
+    const lib = $("libList"); lib.innerHTML = "";
+    if (!state.library.length) {
+      const p = document.createElement("div"); p.className = "empty"; p.style.padding = "6px 0"; p.style.textAlign = "left";
+      p.textContent = "Kayıtlı işin yok. Bir işin yanındaki ☆ işaretine dokunarak kaydedebilirsin.";
+      lib.appendChild(p);
+    }
+    state.library.forEach((l, i) => {
+      const item = document.createElement("div"); item.className = "lib-item"; item.style.borderColor = colorFor(i) + "66";
+      const add = document.createElement("button"); add.type = "button"; add.className = "add";
+      add.textContent = "+ " + l.title + " · " + l.minutes + " dk"; add.title = "Bugünkü listeme ekle";
+      add.onclick = () => { state.today.push({ id: uid(), title: l.title, minutes: l.minutes, done: false }); persist(); render(); };
+      const x = document.createElement("button"); x.type = "button"; x.className = "x"; x.textContent = "✕"; x.title = "Kayıtlılardan sil";
+      x.onclick = () => { state.library = state.library.filter(y => y.id !== l.id); persist(); render(); };
+      item.append(add, x); lib.appendChild(item);
+    });
+  }
+
+  function dkey(dt){ const d = dt ? new Date(dt) : new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+  function logEvent(e){ if (!Array.isArray(state.events)) state.events = []; state.events.push(e); if (state.events.length > 1500) state.events.splice(0, state.events.length - 1500); }
+  function syncDone(t){
+    if (t && t.from) { if (window.__odakSyncDone) window.__odakSyncDone(t); }
+    else if (t) logEvent({ ts: Date.now(), type: "task", title: t.title });
+  }
+  function elapsedMs(){ if (!timer) return 0; const rem = timer.paused ? timer.remaining : timer.endAt - Date.now(); return Math.max(0, Math.min(timer.total, timer.total - rem)); }
+  function logFocus(ms, ok){ if (!timer || timer.isBreak) return; const min = Math.round(ms / 60000); if (min < 1) return; logEvent({ ts: Date.now(), type: "focus", min, title: timer.title, ok }); persist(); }
+  function toggleLibrary(t){
+    if (inLibrary(t.title)) state.library = state.library.filter(l => l.title.trim().toLowerCase() !== t.title.trim().toLowerCase());
+    else state.library.push({ id: uid(), title: t.title, minutes: t.minutes });
+    persist(); render();
+  }
+
+  // ---------- Add ----------
+  $("addForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const title = $("newTitle").value.trim(); if (!title) return;
+    let m = parseInt($("newMin").value, 10); if (!(m > 0)) m = 25; m = Math.min(m, 600);
+    state.today.push({ id: uid(), title, minutes: m, done: false });
+    if ($("newSave").checked && !inLibrary(title)) state.library.push({ id: uid(), title, minutes: m });
+    $("newTitle").value = ""; $("newTitle").focus();
+    persist(); render();
+  });
+  $("clearDone").onclick = () => { state.today = state.today.filter(t => !t.done); persist(); render(); };
+
+  // ---------- Audio ----------
+  let actx = null;
+  function unlockAudio(){
+    try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch(e){}
+  }
+  function chime(){
+    if (!actx) return;
+    try {
+      const notes = [523.25, 659.25, 783.99, 1046.5];
+      for (let r = 0; r < 3; r++) notes.forEach((f, i) => {
+        const o = actx.createOscillator(), g = actx.createGain();
+        o.type = "sine"; o.frequency.value = f;
+        const t0 = actx.currentTime + r * 1.1 + i * 0.16;
+        g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.35, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.5);
+        o.connect(g).connect(actx.destination); o.start(t0); o.stop(t0 + 0.55);
+      });
+    } catch(e){}
+    try { navigator.vibrate && navigator.vibrate([300,150,300,150,500]); } catch(e){}
+  }
+
+  // ---------- Pre-start reminder ----------
+  let preTaskId = null, preIsBreak = false;
+  const PRESETS = [5,10,15,25,30,45,60,90];
+  function buildPresets(sel){
+    const box = $("presets"); box.innerHTML = "";
+    PRESETS.forEach(m => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = m + " dk";
+      if (m === sel) b.className = "sel";
+      b.onclick = () => { $("preMin").value = m; buildPresets(m); };
+      box.appendChild(b);
+    });
+  }
+  $("preMin").addEventListener("input", () => buildPresets(parseInt($("preMin").value,10)));
+  function checkReady(){
+    const ok = [...document.querySelectorAll(".pc[data-req]")].every(c => c.checked);
+    $("preStart").disabled = !ok;
+  }
+  document.querySelectorAll(".pc").forEach(c => c.addEventListener("change", checkReady));
+  function openPre(taskId){
+    const t = state.today.find(x => x.id === taskId); if (!t) return;
+    preTaskId = taskId;
+    $("preFor").textContent = "İş: " + t.title;
+    $("preMin").value = t.minutes; buildPresets(t.minutes);
+    document.querySelectorAll(".pc").forEach(c => c.checked = false);
+    checkReady();
+    $("endOverlay").classList.remove("show");
+    $("preOverlay").classList.add("show");
+  }
+  $("preCancel").onclick = () => $("preOverlay").classList.remove("show");
+  $("preStart").onclick = () => {
+    unlockAudio();
+    const t = state.today.find(x => x.id === preTaskId); if (!t) return;
+    let m = parseInt($("preMin").value, 10); if (!(m > 0)) m = t.minutes; m = Math.min(m, 600);
+    if (m !== t.minutes) { t.minutes = m; persist(); render(); }
+    $("preOverlay").classList.remove("show");
+    startTimer({ taskId: t.id, title: t.title, total: m * 60000, isBreak: false });
+  };
+
+  // ---------- Timer ----------
+  let timer = null; // {taskId,title,total,endAt,remaining,paused,isBreak}
+  let tick = null, quoteTick = null;
+  const ARC = 326.73;
+  const baseTitle = document.title;
+
+  function saveTimer(){ try { timer ? localStorage.setItem(LS_TIMER, JSON.stringify(timer)) : localStorage.removeItem(LS_TIMER); } catch(e){} }
+  function startTimer(opts){
+    timer = { ...opts, endAt: Date.now() + opts.total, remaining: opts.total, paused: false };
+    saveTimer(); showTimer();
+  }
+  function showTimer(){
+    $("tsTask").textContent = timer.title;
+    $("tsLabel").textContent = timer.isBreak ? "Mola zamanı" : "Şu an odaklandığın iş";
+    $("tsDone").style.display = timer.isBreak ? "none" : "";
+    $("timerScreen").classList.add("show");
+    rotateQuote(); clearInterval(quoteTick); quoteTick = setInterval(rotateQuote, 45000);
+    clearInterval(tick); tick = setInterval(update, 250); update();
+  }
+  function rotateQuote(){
+    const q = timer && timer.isBreak ? "Derin bir nefes al, biraz esne, su iç 🌿" : QUOTES[Math.floor(Math.random()*QUOTES.length)];
+    $("tsQuote").textContent = q;
+  }
+  function fmt(ms){ const s = Math.max(0, Math.ceil(ms/1000)); const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), ss = s%60;
+    return (h ? h + ":" + String(m).padStart(2,"0") : String(m).padStart(2,"0")) + ":" + String(ss).padStart(2,"0"); }
+  function update(){
+    if (!timer) return;
+    const rem = timer.paused ? timer.remaining : timer.endAt - Date.now();
+    $("tsTime").textContent = fmt(rem);
+    $("arc").setAttribute("stroke-dashoffset", String(ARC * (1 - Math.max(0, rem) / timer.total)));
+    $("tsPaused").style.visibility = timer.paused ? "visible" : "hidden";
+    $("tsPause").textContent = timer.paused ? "▶ Devam et" : "⏸ Duraklat";
+    document.title = (timer.paused ? "⏸ " : "⏳ ") + fmt(rem) + " · " + timer.title;
+    if (!timer.paused && rem <= 0) finish();
+  }
+  $("tsPause").onclick = () => {
+    unlockAudio();
+    if (!timer) return;
+    if (timer.paused) { timer.endAt = Date.now() + timer.remaining; timer.paused = false; }
+    else { timer.remaining = timer.endAt - Date.now(); timer.paused = true; }
+    saveTimer(); update();
+  };
+  function closeTimer(){
+    clearInterval(tick); clearInterval(quoteTick);
+    $("timerScreen").classList.remove("show");
+    document.title = baseTitle;
+  }
+  $("tsStop").onclick = () => { logFocus(elapsedMs(), false); closeTimer(); timer = null; saveTimer(); };
+  $("tsDone").onclick = () => {
+    if (!timer) return;
+    logFocus(elapsedMs(), true);
+    const t = state.today.find(x => x.id === timer.taskId); if (t) { t.done = true; syncDone(t); persist(); render(); }
+    const last = timer; closeTimer(); timer = null; saveTimer(); burst();
+    showEnd(last, true);
+  };
+  function finish(){
+    logFocus(timer.total, true);
+    const last = timer; closeTimer(); timer = null; saveTimer();
+    chime(); burst();
+    showEnd(last, false);
+  }
+  let lastFinished = null;
+  function showEnd(last, alreadyDone){
+    lastFinished = last;
+    if (last.isBreak) {
+      $("endTitle").textContent = "🌿 Mola bitti!";
+      $("endFor").textContent = "Hazırsan sıradaki işi seç. Başlamadan önce telefonunu yine sessize al.";
+    } else if (alreadyDone) {
+      $("endTitle").textContent = "🎉 Harika, bitirdin!";
+      $("endFor").textContent = "“" + last.title + "” tamamlandı. Kendinle gurur duy!";
+    } else {
+      $("endTitle").textContent = "⏰ Süre doldu!";
+      $("endFor").textContent = "“" + last.title + "” için ayırdığın süre bitti. Bitirdin mi?";
+    }
+    const showDoneBtns = !last.isBreak && !alreadyDone;
+    $("endDone").style.display = showDoneBtns ? "" : "none";
+    $("endMore").style.display = showDoneBtns ? "" : "none";
+    $("endBreak").style.display = last.isBreak ? "none" : "";
+    const nl = $("nextList"); nl.innerHTML = "";
+    const next = state.today.filter(t => !t.done && t.id !== (showDoneBtns ? null : last.taskId));
+    if (!next.length) { const d = document.createElement("div"); d.className = "hint"; d.textContent = "Bekleyen işin kalmadı 🎊 Listeye dönüp yeni iş ekleyebilirsin."; nl.appendChild(d); }
+    next.forEach(t => {
+      const b = document.createElement("button"); b.type = "button";
+      const a = document.createElement("span"); a.textContent = "▶ " + t.title;
+      const c = document.createElement("span"); c.className = "chip"; c.textContent = t.minutes + " dk";
+      b.append(a, c); b.onclick = () => openPre(t.id); nl.appendChild(b);
+    });
+    $("endOverlay").classList.add("show");
+  }
+  $("endDone").onclick = () => {
+    const t = lastFinished && state.today.find(x => x.id === lastFinished.taskId);
+    if (t) { t.done = true; syncDone(t); persist(); render(); burst(); }
+    showEnd(lastFinished, true);
+  };
+  $("endMore").onclick = () => {
+    unlockAudio(); $("endOverlay").classList.remove("show");
+    startTimer({ taskId: lastFinished.taskId, title: lastFinished.title, total: 5*60000, isBreak: false });
+  };
+  $("endBreak").onclick = () => {
+    unlockAudio(); $("endOverlay").classList.remove("show");
+    startTimer({ taskId: null, title: "☕ Mola", total: 5*60000, isBreak: true });
+  };
+  $("endClose").onclick = () => $("endOverlay").classList.remove("show");
+
+  // restore running timer after reload
+  try {
+    const saved = JSON.parse(localStorage.getItem(LS_TIMER) || "null");
+    if (saved && saved.total) {
+      timer = saved;
+      if (!timer.paused && timer.endAt - Date.now() <= 0) { logFocus(timer.total, true); const last = timer; timer = null; saveTimer(); setTimeout(() => showEnd(last, false), 50); }
+      else showTimer();
+    }
+  } catch(e){}
+
+  // ---------- Confetti ----------
+  function burst(){
+    const box = $("confetti");
+    for (let i = 0; i < 60; i++) {
+      const p = document.createElement("i");
+      p.style.left = Math.random()*100 + "vw";
+      p.style.background = COLORS[i % COLORS.length];
+      p.style.animationDelay = (Math.random()*0.6) + "s";
+      p.style.animationDuration = (1.8 + Math.random()*1.4) + "s";
+      box.appendChild(p);
+      setTimeout(() => p.remove(), 3800);
+    }
+  }
+
+
+  // ---------- Tabs ----------
+  function showTab(which){
+    const m = which === "month", st = which === "stats";
+    $("viewFocus").hidden = m || st; $("viewMonth").hidden = !m; $("viewStats").hidden = !st;
+    $("tabFocus").classList.toggle("on", !m && !st); $("tabMonth").classList.toggle("on", m); $("tabStats").classList.toggle("on", st);
+    if (st) renderStats();
+    try { localStorage.setItem("odak-tab", which); } catch(e){}
+    if (m) { const te = renderMonth(); if (te && !showTab._scrolled) { showTab._scrolled = true; setTimeout(() => te.scrollIntoView({ behavior: "smooth", block: "center" }), 80); } }
+  }
+  $("tabFocus").onclick = () => showTab("focus");
+  $("tabMonth").onclick = () => showTab("month");
+  $("tabStats").onclick = () => showTab("stats");
+
+  function toast(msg){
+    const t = $("toast"); t.textContent = msg; t.classList.add("show");
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 2200);
+  }
+
+  // ---------- Monthly list ----------
+  const AYLAR = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+  const GUNLER = ["PAZ","PZT","SAL","ÇAR","PER","CUM","CMT"];
+  const ITEMS = 5;
+  let mView = (() => { const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() }; })();
+  const mKey = () => mView.y + "-" + String(mView.m + 1).padStart(2, "0");
+  function monthData(create){
+    const k = mKey();
+    if (!state.months[k] && create) state.months[k] = { goal: "", days: {}, reflect: ["","",""] };
+    return state.months[k] || { goal: "", days: {}, reflect: ["","",""] };
+  }
+  function dayItems(md, d){
+    const arr = (md.days && md.days[d]) || [];
+    const out = [];
+    for (let i = 0; i < ITEMS; i++) out.push({ t: (arr[i] && arr[i].t) || "", d: !!(arr[i] && arr[i].d) });
+    return out;
+  }
+  function setItem(d, i, patch){
+    const md = monthData(true);
+    if (!md.days) md.days = {};
+    const items = dayItems(md, d);
+    Object.assign(items[i], patch);
+    if (items.every(x => !x.t && !x.d)) delete md.days[d]; else md.days[d] = items;
+    persist(); updateProgress();
+  }
+  function updateProgress(){
+    const md = monthData(false);
+    let filled = 0, done = 0;
+    Object.values(md.days || {}).forEach(arr => arr.forEach(x => { if (x.t || x.d) filled++; if (x.d) done++; }));
+    const pct = filled ? Math.round(done / filled * 100) : 0;
+    $("mProg").textContent = done + " / " + filled + " tamamlandı";
+    $("mPct").textContent = "%" + pct;
+    $("mBar").style.width = pct + "%";
+    $("endCount").textContent = done + " / " + filled;
+  }
+  function renderMonth(){
+    const md = monthData(false);
+    $("mTitle").textContent = AYLAR[mView.m] + " " + mView.y;
+    $("mGoal").value = md.goal || "";
+    [0,1,2].forEach(i => { $("r" + i).value = (md.reflect && md.reflect[i]) || ""; });
+    const n = new Date(mView.y, mView.m + 1, 0).getDate();
+    const now = new Date();
+    const isCur = now.getFullYear() === mView.y && now.getMonth() === mView.m;
+    const box = $("days"); box.innerHTML = "";
+    let todayEl = null;
+    for (let d = 1; d <= n; d++) {
+      const col = colorFor(d - 1);
+      const card = document.createElement("div"); card.className = "day"; card.style.borderColor = col;
+      const side = document.createElement("div"); side.className = "day-side"; side.style.background = col + "22";
+      const num = document.createElement("div"); num.className = "day-num"; num.style.background = col; num.textContent = d;
+      const wd = document.createElement("div"); wd.className = "day-wd"; wd.style.color = col; wd.textContent = GUNLER[new Date(mView.y, mView.m, d).getDay()];
+      side.append(num, wd);
+      if (isCur && now.getDate() === d) { card.classList.add("today"); const b = document.createElement("div"); b.className = "day-badge"; b.textContent = "BUGÜN"; side.appendChild(b); todayEl = card; }
+      const body = document.createElement("div"); body.className = "day-body";
+      dayItems(md, d).forEach((it, i) => {
+        const row = document.createElement("div"); row.className = "item" + (it.d ? " done" : "");
+        const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = it.d; cb.style.accentColor = col; cb.setAttribute("aria-label", d + ". gün, " + (i+1) + ". iş tamamlandı");
+        const tx = document.createElement("input"); tx.type = "text"; tx.value = it.t; tx.maxLength = 120; tx.placeholder = i === 0 ? "Yapılacak iş…" : ""; tx.setAttribute("aria-label", d + ". gün, " + (i+1) + ". iş");
+        const send = document.createElement("button"); send.type = "button"; send.className = "send"; send.textContent = "⏱"; send.title = "Zamanlayıcıyla başlatmak için Odak listeme ekle";
+        send.hidden = !it.t || it.d;
+        cb.onchange = () => { row.classList.toggle("done", cb.checked); send.hidden = !tx.value.trim() || cb.checked; setItem(d, i, { d: cb.checked }); if (cb.checked) burst(); };
+        tx.oninput = () => { send.hidden = !tx.value.trim() || cb.checked; setItem(d, i, { t: tx.value }); };
+        tx.onkeydown = e => { if (e.key === "Enter") { const nx = row.nextElementSibling && row.nextElementSibling.querySelector("input[type=text]"); if (nx) nx.focus(); else tx.blur(); } };
+        send.onclick = () => {
+          const title = tx.value.trim(); if (!title) return;
+          const lib = state.library.find(l => l.title.trim().toLowerCase() === title.toLowerCase());
+          if (!state.today.some(t => !t.done && t.title.trim().toLowerCase() === title.toLowerCase()))
+            state.today.push({ id: uid(), title, minutes: lib ? lib.minutes : 25, done: false, from: { m: mKey(), d, i } });
+          persist(); render(); toast("“" + title + "” Odak listene eklendi ⏱");
+        };
+        row.append(cb, tx, send); body.appendChild(row);
+      });
+      card.append(side, body); box.appendChild(card);
+    }
+    updateProgress();
+    return todayEl;
+  }
+  $("mGoal").oninput = () => { monthData(true).goal = $("mGoal").value; persist(); };
+  document.querySelectorAll(".reflect textarea").forEach(ta => ta.oninput = () => {
+    const md = monthData(true); if (!Array.isArray(md.reflect)) md.reflect = ["","",""];
+    md.reflect[+ta.dataset.r] = ta.value; persist();
+  });
+  $("mPrev").onclick = () => { mView.m--; if (mView.m < 0) { mView.m = 11; mView.y--; } renderMonth(); };
+  $("mNext").onclick = () => { mView.m++; if (mView.m > 11) { mView.m = 0; mView.y++; } renderMonth(); };
+
+  // When a task that came from the monthly list is finished, tick it there too
+  function syncDoneToMonth(t){
+    if (!t || !t.from) return;
+    const md = state.months[t.from.m]; if (!md || !md.days || !md.days[t.from.d]) return;
+    const it = md.days[t.from.d][t.from.i];
+    if (it && it.t.trim().toLowerCase() === t.title.trim().toLowerCase()) { it.d = true; persist(); }
+  }
+  window.__odakSyncDone = syncDoneToMonth;
+
+  // Printable PDF link only where the file exists (e.g. Vercel)
+  try { fetch("Aylik_Yapilacaklar_Listesi.pdf", { method: "HEAD" }).then(r => { if (r.ok) $("pdfBtn").style.display = "block"; }).catch(() => {}); } catch(e){}
+
+
+  // ---------- Statistics ----------
+  let sView = (() => { const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() }; })();
+  $("sPrev").onclick = () => { sView.m--; if (sView.m < 0) { sView.m = 11; sView.y--; } renderStats(); };
+  $("sNext").onclick = () => { sView.m++; if (sView.m > 11) { sView.m = 0; sView.y++; } renderStats(); };
+  const C_DONE = "#0FA37F", C_MISS = "#E5484D", C_FOCUS = "#5F27CD";
+  const svgNS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs, parent){ const e = document.createElementNS(svgNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+
+  function collect(y, m){
+    const key = y + "-" + String(m + 1).padStart(2, "0");
+    const n = new Date(y, m + 1, 0).getDate();
+    const todayK = dkey();
+    const md = state.months[key] || { days: {} };
+    const days = [];
+    const done = [], miss = [];
+    for (let d = 1; d <= n; d++) {
+      const dk = key + "-" + String(d).padStart(2, "0");
+      const past = dk < todayK, isToday = dk === todayK;
+      const row = { d, dk, past, isToday, done: 0, miss: 0, pending: 0, focus: 0 };
+      (md.days && md.days[d] || []).forEach((it, i) => {
+        if (!it.t && !it.d) return;
+        if (it.d) { row.done++; done.push({ d, title: it.t || "(adsız iş)" }); }
+        else if (past) { row.miss++; miss.push({ d, i, title: it.t }); }
+        else row.pending++;
+      });
+      days.push(row);
+    }
+    let sessions = 0, stopped = 0, focusMin = 0;
+    (state.events || []).forEach(e => {
+      const dk = dkey(e.ts); if (dk.slice(0, 7) !== key) return;
+      const row = days[+dk.slice(8) - 1]; if (!row) return;
+      if (e.type === "focus") { row.focus += e.min || 0; focusMin += e.min || 0; if (e.ok) sessions++; else stopped++; }
+      else if (e.type === "task") { row.done++; done.push({ d: row.d, title: e.title, odak: true }); }
+    });
+    return { key, n, days, done, miss, sessions, stopped, focusMin };
+  }
+
+  function streaks(){
+    const set = new Set();
+    Object.entries(state.months || {}).forEach(([k, md]) => Object.entries(md.days || {}).forEach(([d, arr]) => { if (arr.some(x => x.d)) set.add(k + "-" + String(d).padStart(2, "0")); }));
+    (state.events || []).forEach(e => { if (e.type === "task" || (e.type === "focus" && e.ok)) set.add(dkey(e.ts)); });
+    let cur = 0; const t = new Date();
+    if (!set.has(dkey(t))) t.setDate(t.getDate() - 1); // today not done yet doesn't break the streak
+    while (set.has(dkey(t))) { cur++; t.setDate(t.getDate() - 1); }
+    const sorted = [...set].sort(); let best = 0, run = 0, prev = null;
+    sorted.forEach(k => { const d = new Date(k + "T12:00:00"); if (prev && (d - prev) / 864e5 < 1.5) run++; else run = 1; best = Math.max(best, run); prev = d; });
+    return { cur, best };
+  }
+
+  function fmtMin(m){ if (m < 60) return m + " dk"; const h = Math.floor(m / 60), r = m % 60; return h + " sa" + (r ? " " + r + " dk" : ""); }
+
+  function barChart(host, data, opts){
+    host.innerHTML = "";
+    const W = Math.max(300, Math.round(host.clientWidth || 640)), H = W < 500 ? 170 : 200, pl = 30, pr = 6, pt = 10, pb = 22;
+    const n = data.length, iw = W - pl - pr, ih = H - pt - pb, slot = iw / n, bw = Math.max(4, Math.min(16, slot - 4));
+    const max = Math.max(opts.minMax || 1, ...data.map(opts.total));
+    const nice = (() => { const steps = [1,2,4,5,10,15,20,30,60,90,120,180,240]; const raw = max / 4; return steps.find(s => s >= raw) || Math.ceil(raw / 60) * 60; })();
+    const top = Math.ceil(max / nice) * nice;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart", role: "img", "aria-label": opts.label });
+    const defs = el("defs", {}, svg);
+    const pat = el("pattern", { id: "hatch" + opts.id, width: 5, height: 5, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" }, defs);
+    el("rect", { width: 5, height: 5, fill: "#F59A9D" }, pat); el("rect", { width: 3, height: 5, fill: C_MISS }, pat);
+    const y = v => pt + ih - (v / top) * ih;
+    for (let v = 0; v <= top; v += nice) {
+      el("line", { x1: pl, x2: W - pr, y1: y(v), y2: y(v), stroke: v === 0 ? "#D9D4C5" : "#EFEBE0", "stroke-width": 1 }, svg);
+      const t = el("text", { x: pl - 5, y: y(v) + 3.5, "text-anchor": "end" }, svg); t.textContent = v;
+    }
+    const tip = document.createElement("div"); tip.className = "tip"; host.appendChild(tip);
+    data.forEach((row, i) => {
+      const cx = pl + slot * i + slot / 2, x = cx - bw / 2;
+      if (row.d === 1 || row.d % 5 === 0 || row.isToday) {
+        const t = el("text", { x: cx, y: H - 6, "text-anchor": "middle" }, svg); t.textContent = row.d;
+        if (row.isToday) { t.setAttribute("fill", "#2D3047"); t.setAttribute("font-weight", "900"); }
+      }
+      let base = 0; const total = opts.total(row);
+      opts.segs.forEach(sg => {
+        const v = sg.v(row); if (!v) return;
+        const yb = y(base) - (base > 0 ? 2 : 0), yt = y(base + v);
+        const h = yb - yt; if (h <= 0) { base += v; return; }
+        if (base + v === total) {
+          const r = Math.min(4, bw / 2, h);
+          el("path", { d: `M${x},${yb} V${yt + r} Q${x},${yt} ${x + r},${yt} H${x + bw - r} Q${x + bw},${yt} ${x + bw},${yt + r} V${yb} Z`, fill: sg.fill }, svg);
+        } else el("rect", { x, y: yt, width: bw, height: h, fill: sg.fill }, svg);
+        base += v;
+      });
+      const hit = el("rect", { x: pl + slot * i, y: pt, width: slot, height: ih, fill: "transparent", style: "cursor:pointer" }, svg);
+      const show = () => {
+        const rect = svg.getBoundingClientRect(), sc = rect.width / W;
+        tip.innerHTML = ""; const b = document.createElement("b"); b.textContent = row.d + " " + AYLAR[sView.m]; tip.appendChild(b);
+        tip.appendChild(document.createTextNode(" · " + opts.tip(row)));
+        tip.style.display = "block"; tip.style.left = (cx * sc) + "px"; tip.style.top = (y(opts.total(row)) * sc) + "px";
+      };
+      hit.addEventListener("mouseenter", show); hit.addEventListener("click", show);
+      hit.addEventListener("mouseleave", () => tip.style.display = "none");
+    });
+    host.insertBefore(svg, tip);
+  }
+
+  function kpi(ic, v, l, color){
+    const d = document.createElement("div"); d.className = "kpi"; d.style.borderColor = color + "55";
+    const a = document.createElement("div"); a.className = "ic"; a.textContent = ic;
+    const b = document.createElement("div"); b.className = "v"; b.textContent = v;
+    const c = document.createElement("div"); c.className = "l"; c.textContent = l;
+    d.append(a, b, c); return d;
+  }
+
+  function renderStats(){
+    $("sTitle").textContent = AYLAR[sView.m] + " " + sView.y;
+    const S = collect(sView.y, sView.m), st = streaks();
+    const dn = S.done.length, ms = S.miss.length, tot = dn + ms;
+    const rate = tot ? Math.round(dn / tot * 100) : 0;
+    const K = $("kpis"); K.innerHTML = "";
+    K.append(
+      kpi("✅", dn, "Yaptığım iş", C_DONE),
+      kpi("❌", ms, "Yapamadığım iş", C_MISS),
+      kpi("🎯", "%" + rate, "Başarı oranı", "#54A0FF"),
+      kpi("⏱️", fmtMin(S.focusMin), "Toplam odak süresi", C_FOCUS),
+      kpi("🍅", S.sessions, "Tamamlanan odak seansı" + (S.stopped ? " (" + S.stopped + " yarıda)" : ""), "#FF9F43"),
+      kpi("🔥", st.cur + " gün", "Şu anki seri · en iyi " + st.best, "#FF6FB5")
+    );
+
+    // insight
+    const wdDone = [0,0,0,0,0,0,0], wdAll = [0,0,0,0,0,0,0];
+    S.days.forEach(r => { const w = new Date(sView.y, sView.m, r.d).getDay(); wdDone[w] += r.done; wdAll[w] += r.done + r.miss; });
+    const GUN_AD = ["Pazar","Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi"];
+    let bestW = -1; wdDone.forEach((v, i) => { if (v > 0 && (bestW < 0 || v > wdDone[bestW])) bestW = i; });
+    let worstW = -1; wdAll.forEach((v, i) => { if (v > 0 && wdAll[i] - wdDone[i] > 0) { const mr = (wdAll[i] - wdDone[i]) / v; if (worstW < 0 || mr > (wdAll[worstW] - wdDone[worstW]) / wdAll[worstW]) worstW = i; } });
+    const pend = S.days.filter(r => !r.past).reduce((a, r) => a + r.pending, 0);
+    const parts = [];
+    if (!tot && !S.focusMin) parts.push("Bu ay için henüz veri yok. Aylık Liste'ye iş yaz veya bir odak seansı başlat; istatistiklerin burada oluşacak 🌱");
+    else {
+      parts.push(rate >= 80 ? "Harika gidiyorsun! İşlerinin %" + rate + "'ini bitirdin 🎉" : rate >= 50 ? "İyi gidiyorsun: işlerinin %" + rate + "'ini bitirdin. Biraz daha gayretle %80'i geçebilirsin 💪" : tot ? "Bu ay işlerinin %" + rate + "'ini bitirdin. Günlük iş sayısını azaltıp küçük adımlarla ilerlemeyi dene 🌱" : "");
+      if (bestW >= 0) parts.push("En verimli günün: " + GUN_AD[bestW] + ".");
+      if (worstW >= 0 && worstW !== bestW) parts.push("En çok iş kaçırdığın gün: " + GUN_AD[worstW] + ". O güne daha az iş koymayı düşünebilirsin.");
+      if (S.focusMin) parts.push("Bu ay toplam " + fmtMin(S.focusMin) + " odaklandın.");
+      if (pend) parts.push("Bugün ve sonrası için bekleyen " + pend + " işin var.");
+    }
+    $("insight").textContent = parts.filter(Boolean).join(" ");
+
+    barChart($("c1"), S.days, { id: "a", label: "Günlük yapılan ve yapılamayan işler",
+      total: r => r.done + r.miss, minMax: 5,
+      segs: [{ v: r => r.done, fill: C_DONE }, { v: r => r.miss, fill: "url(#hatcha)" }],
+      tip: r => (r.done + r.miss || r.pending) ? "✓ " + r.done + " yaptım · ✗ " + r.miss + " yapamadım" + (r.pending ? " · " + r.pending + " bekliyor" : "") : "iş yok" });
+    barChart($("c2"), S.days, { id: "b", label: "Günlük odak süresi, dakika",
+      total: r => r.focus, minMax: 30,
+      segs: [{ v: r => r.focus, fill: C_FOCUS }],
+      tip: r => r.focus ? fmtMin(r.focus) + " odak" : "odak seansı yok" });
+
+    const dl = $("doneList"); dl.innerHTML = "";
+    $("doneTag").textContent = dn; $("missTag").textContent = ms;
+    const mkLi = (it, list, extra) => {
+      const li = document.createElement("li");
+      const a = document.createElement("span"); a.className = "dt"; a.textContent = it.d + " " + AYLAR[sView.m].slice(0, 3);
+      const b = document.createElement("span"); b.className = "tt"; b.textContent = it.title;
+      li.append(a, b); if (extra) li.appendChild(extra); list.appendChild(li);
+    };
+    if (!dn) { const li = document.createElement("li"); li.textContent = "Henüz tamamlanan iş yok."; li.style.color = "var(--muted)"; dl.appendChild(li); }
+    S.done.slice().sort((a, b) => b.d - a.d).forEach(it => mkLi(it, dl, it.odak ? Object.assign(document.createElement("span"), { className: "chip", textContent: "Odak" }) : null));
+    const ml = $("missList"); ml.innerHTML = "";
+    if (!ms) { const li = document.createElement("li"); li.textContent = tot ? "Kaçırdığın iş yok, süpersin! 🌟" : "Henüz veri yok."; li.style.color = "var(--muted)"; ml.appendChild(li); }
+    S.miss.slice().sort((a, b) => b.d - a.d).forEach(it => {
+      const btn = document.createElement("button"); btn.type = "button"; btn.className = "mv"; btn.textContent = "↻ Bugüne taşı";
+      btn.onclick = () => moveToToday(S.key, it, btn);
+      mkLi(it, ml, btn);
+    });
+  }
+
+  let rsz = null; window.addEventListener("resize", () => { clearTimeout(rsz); rsz = setTimeout(() => { if (!$("viewStats").hidden) renderStats(); }, 200); });
+  function moveToToday(srcKey, it, btn){
+    const now = new Date(); const tk = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0"); const td = now.getDate();
+    if (!state.months[tk]) state.months[tk] = { goal: "", days: {}, reflect: ["","",""] };
+    const md = state.months[tk]; if (!md.days) md.days = {};
+    const items = dayItems(md, td);
+    if (items.some(x => x.t.trim().toLowerCase() === it.title.trim().toLowerCase())) { toast("Bu iş zaten bugünün listesinde 👍"); return; }
+    const slot = items.findIndex(x => !x.t && !x.d);
+    if (slot < 0) { toast("Bugünün kartı dolu (5 iş). Önce birini tamamla ya da sil."); return; }
+    items[slot] = { t: it.title, d: false }; md.days[td] = items;
+    persist(); btn.disabled = true; btn.textContent = "✓ Taşındı";
+    toast("“" + it.title + "” bugünün listesine eklendi 📅");
+  }
+
+  $("topQuote").textContent = QUOTES[new Date().getDate() % QUOTES.length];
+  render();
+  try { { const tb = localStorage.getItem("odak-tab"); if (tb === "month" || tb === "stats") showTab(tb); } } catch(e){}
+
+})();
+</script>
+</body>
+</html>
