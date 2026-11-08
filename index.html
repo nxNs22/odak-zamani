@@ -36,7 +36,7 @@
   .card h2{margin:0 0 12px;font-size:19px;font-weight:900;display:flex;align-items:center;gap:8px}
   .card h2 .tag{font-size:12px;font-weight:800;color:#fff;border-radius:999px;padding:2px 9px}
   .row{display:flex;gap:8px;flex-wrap:wrap}
-  input[type=text],input[type=number]{font:inherit;font-weight:700;color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:11px 13px;background:#fff;outline:none;min-width:0}
+  input[type=text],input[type=number],input[type=email],input[type=password]{font:inherit;font-weight:700;color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:11px 13px;background:#fff;outline:none;min-width:0}
   input:focus{border-color:var(--blue)}
   #newTitle{flex:1 1 220px}
   .min-wrap{display:flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:14px;padding:0 10px;background:#fff}
@@ -183,6 +183,19 @@
   .lst .tt{flex:1;word-break:break-word}
   .lst .mv{background:#F3F0E7;color:var(--ink);padding:5px 9px;font-size:12.5px;border-radius:10px;white-space:nowrap}
   .insight{background:#5F27CD10;border-radius:16px;padding:12px 14px;font-weight:700;color:var(--ink);line-height:1.5}
+
+  /* Account */
+  .acct{display:none;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:#fff;border:2px solid var(--line);border-radius:16px;padding:10px 14px;margin:10px 0 0;font-weight:700;font-size:14px}
+  .acct.show{display:flex}
+  .acct .who{display:flex;align-items:center;gap:8px;min-width:0;word-break:break-all}
+  .acct .dot{width:10px;height:10px;border-radius:50%;flex:none;background:#C9C5B8}
+  .acct .dot.on{background:#0FA37F}
+  .acct button{padding:8px 13px;font-size:14px}
+  .auth-in{width:100%;margin-bottom:9px}
+  .auth-msg{font-weight:700;font-size:14px;border-radius:12px;padding:10px 12px;margin:4px 0 6px;display:none}
+  .auth-msg.err{display:block;background:#FFE3E3;color:#B42318}
+  .auth-msg.ok{display:block;background:#D6F7EE;color:#0B6E55}
+  .linkish{background:none;color:var(--blue);padding:4px 0;font-weight:800;font-size:14px}
 </style>
 </head>
 <body>
@@ -199,6 +212,7 @@
     <button type="button" id="tabMonth" role="tab">📅 Aylık Liste</button>
     <button type="button" id="tabStats" role="tab">📊 İstatistik</button>
   </nav>
+  <div class="acct" id="acct" aria-live="polite"></div>
 
   <div id="viewFocus">
   <section class="card">
@@ -355,6 +369,27 @@
   </div>
 </div>
 
+
+<!-- Auth -->
+<div class="overlay" id="authOverlay" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+  <div class="modal" style="border-top-color:var(--blue)">
+    <h3 id="authTitle">☁️ Giriş yap</h3>
+    <p class="for" id="authSub">İşlerin ve istatistiklerin hesabına kaydedilsin; telefonda ve bilgisayarda aynısını gör.</p>
+    <form id="authForm" autocomplete="on">
+      <input class="auth-in" type="email" id="authEmail" placeholder="E-posta adresin" autocomplete="email" required>
+      <input class="auth-in" type="password" id="authPass" placeholder="Şifre (en az 6 karakter)" autocomplete="current-password" minlength="6" required>
+      <div class="auth-msg" id="authMsg"></div>
+      <div class="actions" style="margin-top:6px">
+        <button class="btn-ghost" type="button" id="authCancel">Vazgeç</button>
+        <button class="btn-blue" type="submit" id="authSubmit">Giriş yap</button>
+      </div>
+    </form>
+    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button type="button" class="linkish" id="authToggle">Hesabın yok mu? Kayıt ol</button>
+      <button type="button" class="linkish" id="authForgot">Şifremi unuttum</button>
+    </div>
+  </div>
+</div>
 <div class="confetti" id="confetti"></div>
 <div class="toast" id="toast"></div>
 
@@ -391,6 +426,7 @@
 
   function persist(){
     try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){}
+    if (window.__sbSchedule) window.__sbSchedule();
     if (!docRef) return;
     clearTimeout(debounce);
     debounce = setTimeout(flush, 600);
@@ -1007,6 +1043,191 @@
     persist(); btn.disabled = true; btn.textContent = "✓ Taşındı";
     toast("“" + it.title + "” bugünün listesine eklendi 📅");
   }
+
+  // ---------- Supabase sync (Vercel / own hosting) ----------
+  (function(){
+    const SB_URL = "https://ivqwylebjepxglpoxqdk.supabase.co";
+    const SB_KEY = "sb_publishable_DDCscOxemEqEZHmQsZ-GYg_J-cJ1Icx";
+    const inClaude = !!(window.claude && window.claude.use) || /claude/i.test(location.hostname);
+    if (inClaude) return;
+    const acct = $("acct");
+    let sb = null, user = null, saving = false, again = false, dirty = false, lastRemote = null, timerId = null;
+    let mode = "login"; // login | signup | reset | newpass
+
+    function refreshAll(){
+      render();
+      const ae = document.activeElement;
+      if (!$("viewMonth").hidden && !(ae && $("viewMonth").contains(ae))) renderMonth();
+      if (!$("viewStats").hidden) renderStats();
+    }
+    function drawAcct(){
+      acct.classList.add("show"); acct.innerHTML = "";
+      const who = document.createElement("div"); who.className = "who";
+      const dot = document.createElement("span"); dot.className = "dot" + (user ? " on" : "");
+      const txt = document.createElement("span");
+      const btn = document.createElement("button"); btn.type = "button";
+      if (!sb) { txt.textContent = "Bulut bağlantısı kurulamadı. Veriler bu cihazda kaydediliyor."; who.append(dot, txt); acct.appendChild(who); return; }
+      if (user) {
+        txt.textContent = "☁️ Hesabına kaydediliyor · " + (user.email || "");
+        btn.className = "btn-ghost"; btn.textContent = "Çıkış yap";
+        btn.onclick = async () => { await sb.auth.signOut(); };
+      } else {
+        txt.textContent = "Verilerin sadece bu cihazda. Kaybolmasın diye giriş yap.";
+        btn.className = "btn-blue"; btn.textContent = "Giriş yap / Kayıt ol";
+        btn.onclick = () => openAuth("login");
+      }
+      who.append(dot, txt); acct.append(who, btn);
+    }
+
+    // ----- auth modal -----
+    function setMsg(t, kind){ const m = $("authMsg"); m.textContent = t || ""; m.className = "auth-msg" + (t ? " " + (kind || "err") : ""); }
+    function openAuth(m){
+      mode = m; setMsg("");
+      const T = { login: ["☁️ Giriş yap", "Giriş yap", "Hesabın yok mu? Kayıt ol"],
+                  signup: ["✨ Hesap oluştur", "Kayıt ol", "Zaten hesabın var mı? Giriş yap"],
+                  reset: ["🔑 Şifre sıfırlama", "Bağlantı gönder", "Giriş ekranına dön"],
+                  newpass: ["🔑 Yeni şifre belirle", "Şifreyi kaydet", ""] }[m];
+      $("authTitle").textContent = T[0]; $("authSubmit").textContent = T[1];
+      $("authToggle").textContent = T[2]; $("authToggle").style.visibility = T[2] ? "visible" : "hidden";
+      $("authForgot").style.visibility = m === "login" ? "visible" : "hidden";
+      $("authEmail").style.display = m === "newpass" ? "none" : ""; $("authEmail").required = m !== "newpass";
+      $("authPass").style.display = m === "reset" ? "none" : ""; $("authPass").required = m !== "reset";
+      $("authPass").autocomplete = m === "login" ? "current-password" : "new-password";
+      $("authPass").placeholder = m === "newpass" ? "Yeni şifre (en az 6 karakter)" : "Şifre (en az 6 karakter)";
+      $("authSub").textContent = m === "reset" ? "E-posta adresini yaz, şifreni yenilemen için bir bağlantı gönderelim."
+        : m === "newpass" ? "Hesabın için yeni bir şifre yaz."
+        : "İşlerin ve istatistiklerin hesabına kaydedilsin; telefonda ve bilgisayarda aynısını gör.";
+      $("authOverlay").classList.add("show");
+      setTimeout(() => (m === "newpass" ? $("authPass") : $("authEmail")).focus(), 50);
+    }
+    $("authCancel").onclick = () => $("authOverlay").classList.remove("show");
+    $("authToggle").onclick = () => openAuth(mode === "login" ? "signup" : "login");
+    $("authForgot").onclick = () => openAuth("reset");
+    function trErr(e){
+      const m = (e && e.message || "").toLowerCase();
+      if (m.includes("invalid login")) return "E-posta veya şifre hatalı.";
+      if (m.includes("not confirmed")) return "E-postanı henüz onaylamadın. Gelen kutundaki (ve spam klasöründeki) onay bağlantısına tıkla.";
+      if (m.includes("already registered") || m.includes("already been registered")) return "Bu e-posta zaten kayıtlı. Giriş yapmayı dene.";
+      if (m.includes("password") && m.includes("6")) return "Şifre en az 6 karakter olmalı.";
+      if (m.includes("rate limit") || m.includes("security purposes")) return "Çok fazla deneme yapıldı. Biraz bekleyip tekrar dene.";
+      if (m.includes("invalid") && m.includes("email")) return "Geçerli bir e-posta adresi yaz.";
+      if (m.includes("fetch") || m.includes("network")) return "İnternet bağlantısı yok gibi görünüyor.";
+      return "Bir sorun oldu: " + (e && e.message || "bilinmeyen hata");
+    }
+    $("authForm").addEventListener("submit", async ev => {
+      ev.preventDefault(); if (!sb) return;
+      const email = $("authEmail").value.trim(), password = $("authPass").value;
+      const b = $("authSubmit"); b.disabled = true; setMsg("");
+      try {
+        if (mode === "login") {
+          const { error } = await sb.auth.signInWithPassword({ email, password }); if (error) throw error;
+          $("authOverlay").classList.remove("show");
+        } else if (mode === "signup") {
+          const { data, error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: location.origin + location.pathname } });
+          if (error) throw error;
+          if (data && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) throw new Error("already registered");
+          if (data && data.session) $("authOverlay").classList.remove("show");
+          else setMsg("Neredeyse bitti! " + email + " adresine bir onay e-postası gönderdik. Bağlantıya tıkla, sonra buraya dönüp giriş yap. (Gelmezse spam klasörüne bak.)", "ok");
+        } else if (mode === "reset") {
+          const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname }); if (error) throw error;
+          setMsg("Şifre sıfırlama bağlantısını " + email + " adresine gönderdik.", "ok");
+        } else if (mode === "newpass") {
+          const { error } = await sb.auth.updateUser({ password }); if (error) throw error;
+          setMsg("Şifren güncellendi ✓", "ok"); setTimeout(() => $("authOverlay").classList.remove("show"), 1200);
+        }
+      } catch(e){ setMsg(trErr(e)); }
+      finally { b.disabled = false; }
+    });
+
+    // ----- data merge -----
+    function lc(x){ return String(x || "").trim().toLowerCase(); }
+    function merge(a, b){ // a = local, b = remote
+      const out = { today: [], library: [], months: {}, events: [] };
+      const byId = new Map();
+      [...(b.today || []), ...(a.today || [])].forEach(t => { const p = byId.get(t.id); byId.set(t.id, p ? { ...p, ...t, done: !!(p.done || t.done) } : { ...t }); });
+      out.today = [...byId.values()];
+      const lib = new Map(); [...(b.library || []), ...(a.library || [])].forEach(l => { if (!lib.has(lc(l.title))) lib.set(lc(l.title), { ...l }); });
+      out.library = [...lib.values()];
+      const keys = new Set([...Object.keys(a.months || {}), ...Object.keys(b.months || {})]);
+      keys.forEach(k => {
+        const A = (a.months || {})[k] || {}, B = (b.months || {})[k] || {};
+        const m = { goal: A.goal || B.goal || "", reflect: [0,1,2].map(i => ((A.reflect || [])[i]) || ((B.reflect || [])[i]) || ""), days: {} };
+        const dks = new Set([...Object.keys(A.days || {}), ...Object.keys(B.days || {})]);
+        dks.forEach(d => {
+          const x = (A.days || {})[d] || [], y = (B.days || {})[d] || [];
+          const n = Math.max(x.length, y.length), arr = [];
+          for (let i = 0; i < n; i++) { const p = x[i] || {}, q = y[i] || {}; arr.push({ t: p.t || q.t || "", d: !!(p.d || q.d) }); }
+          m.days[d] = arr;
+        });
+        out.months[k] = m;
+      });
+      const ev = new Map(); [...(b.events || []), ...(a.events || [])].forEach(e => ev.set(e.ts + "|" + e.type + "|" + e.title, e));
+      out.events = [...ev.values()].sort((p, q) => p.ts - q.ts).slice(-1500);
+      return out;
+    }
+    function normalize(d){ d = d || {}; return { today: Array.isArray(d.today) ? d.today : [], library: Array.isArray(d.library) ? d.library : [], months: (d.months && typeof d.months === "object") ? d.months : {}, events: Array.isArray(d.events) ? d.events : [] }; }
+    function isEmpty(d){ return !d.today.length && !d.library.length && !Object.keys(d.months).length && !d.events.length; }
+    function adopt(d){ state.today = d.today; state.library = d.library; state.months = d.months; state.events = d.events; try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){} refreshAll(); }
+
+    async function save(){
+      if (!sb || !user) return;
+      if (saving) { again = true; return; }
+      saving = true; dirty = false;
+      setSync("☁️ Kaydediliyor…");
+      try {
+        const now = new Date().toISOString();
+        const { error } = await sb.from("user_state").upsert({ user_id: user.id, data: state, updated_at: now });
+        if (error) throw error;
+        lastRemote = now;
+        setSync("✓ Hesabına kaydedildi (" + new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }) + ")");
+      } catch(e){ dirty = true; setSync("⚠️ Buluta kaydedilemedi, bu cihazda saklandı. İnternet gelince tekrar denenecek."); }
+      finally { saving = false; if (again) { again = false; save(); } }
+    }
+    window.__sbSchedule = () => { if (!user) return; dirty = true; clearTimeout(timerId); timerId = setTimeout(save, 800); };
+
+    async function pull(onLogin){
+      if (!sb || !user) return;
+      try {
+        const { data, error } = await sb.from("user_state").select("data, updated_at").eq("user_id", user.id).maybeSingle();
+        if (error) throw error;
+        const local = normalize(state);
+        if (!data) { if (!isEmpty(local)) save(); else setSync("✓ Hesabına bağlandı"); return; }
+        const remote = normalize(data.data);
+        if (onLogin) {
+          const merged = merge(local, remote);
+          adopt(merged); lastRemote = data.updated_at;
+          if (JSON.stringify(merged) !== JSON.stringify(remote)) save(); else setSync("✓ Hesabına kaydedildi");
+        } else if (!dirty && !saving && data.updated_at !== lastRemote) {
+          lastRemote = data.updated_at;
+          if (JSON.stringify(remote) !== JSON.stringify(local)) adopt(remote);
+          setSync("✓ Güncel");
+        } else if (dirty) save();
+      } catch(e){ setSync("⚠️ Hesaba ulaşılamadı. Şimdilik bu cihazda kaydediliyor."); }
+    }
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") pull(false); });
+    window.addEventListener("online", () => { if (dirty) save(); else pull(false); });
+    setInterval(() => { if (document.visibilityState === "visible") pull(false); }, 60000);
+
+    function start(){
+      if (!window.supabase || !window.supabase.createClient) { drawAcct(); return; }
+      sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+      drawAcct();
+      let lastUid = null;
+      sb.auth.onAuthStateChange((event, session) => {
+        if (event === "PASSWORD_RECOVERY") { setTimeout(() => openAuth("newpass"), 100); }
+        const u = session ? session.user : null;
+        const uid = u ? u.id : null;
+        user = u; drawAcct();
+        if (uid && uid !== lastUid) { lastUid = uid; setTimeout(() => pull(true), 0); }
+        if (!uid && lastUid) { lastUid = null; setSync("Çıkış yaptın. Veriler bu cihazda kaydediliyor."); }
+        if (!uid && !lastUid) setSync("Veriler bu cihazda kaydediliyor. Kaybolmasın diye giriş yap.");
+      });
+    }
+    const sc = document.createElement("script");
+    sc.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+    sc.onload = start; sc.onerror = () => drawAcct();
+    document.head.appendChild(sc);
+  })();
 
   $("topQuote").textContent = QUOTES[new Date().getDate() % QUOTES.length];
   render();
